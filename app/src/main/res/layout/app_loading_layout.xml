@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/app_loading_run"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="20dp"
+                android:textColor="@android:color/black"
+                android:text="آرایش یار"
+                android:textSize="18sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginBottom="16dp"
+                android:textColor="@android:color/black"
+                android:text="سامانه جامع زیبایی در کشور" />
+
+            <ImageView
+                android:id="@+id/mPro"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_arayeshyar"
+                android:tint="@color/colorAccent" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/app_loading_error"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="40dp"
+                android:gravity="center"
+                android:text="مشکل در برقراری ارتباط"
+                android:textColor="@color/delete"
+                android:textSize="20sp" />
+
+            <android.support.percent.PercentRelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <Button
+                    android:id="@+id/app_loading_wifi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:drawableTop="@drawable/ic_wifi_72dp"
+                    android:gravity="center"
+                    android:text="وای فای"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp"
+                    app:layout_widthPercent="33%" />
+
+                <Button
+                    android:id="@+id/app_loading_mobildata"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/app_loading_wifi"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:drawableTop="@drawable/ic_mobiledata_72dp"
+                    android:gravity="center"
+                    android:text="شبکه موبایل"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp"
+                    app:layout_widthPercent="34%" />
+
+                <Button
+                    android:id="@+id/app_loading_reconect"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toLeftOf="@+id/app_loading_mobildata"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:drawableTop="@drawable/ic_refresh_72dp"
+                    android:gravity="center"
+                    android:text="تلاش مجدد"
+                    android:textColor="@color/textColor"
+                    android:textSize="16sp"
+                    app:layout_widthPercent="33%" />
+
+            </android.support.percent.PercentRelativeLayout>
+
+
+        </LinearLayout>
+    </FrameLayout>
+
+</LinearLayout>

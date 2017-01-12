@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="@color/colorPrimary"
+        android:fitsSystemWindows="true">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:fitsSystemWindows="true"
+            app:contentScrim="?attr/colorPrimary"
+            app:expandedTitleMarginEnd="0dp"
+            app:expandedTitleMarginStart="0dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                xmlns:tools="http://schemas.android.com/tools"
+                android:id="@+id/personalInfo_actionbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="10dp"
+                android:orientation="horizontal"
+                tools:context=".Dr.Profile.PersonalInfoActivity">
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/dr_imgProfile"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_alignParentRight="true"
+                    app:civ_border_color="@color/colorDivider"
+                    app:civ_border_width="2dp"
+                    app:layout_widthPercent="40%" />
+
+                <TextView
+                    android:id="@+id/profile_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginTop="40dp"
+                    android:layout_toLeftOf="@+id/dr_imgProfile"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp"
+                    app:layout_widthPercent="60%" />
+
+            </android.support.percent.PercentRelativeLayout>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar33"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="@color/colorPrimary"
+                android:contentInsetEnd="0dp"
+                android:contentInsetLeft="0dp"
+                android:contentInsetRight="0dp"
+                android:contentInsetStart="0dp"
+                app:contentInsetEnd="0dp"
+                app:contentInsetLeft="0dp"
+                app:contentInsetRight="0dp"
+                app:contentInsetStart="0dp"
+                app:layout_collapseMode="pin">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:background="@color/colorPrimary"
+                    android:paddingLeft="8dp"
+                    android:paddingRight="8dp">
+
+                    <ImageButton
+                        android:id="@+id/personalInfo_backBtn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="15dp"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_arrow_back_white_24dp"
+                        android:textColor="@android:color/white" />
+
+                    <TextView
+                        android:id="@+id/personalInfo_Title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerVertical="true"
+                        android:layout_marginRight="15dp"
+                        android:layout_toLeftOf="@+id/personalInfo_backBtn"
+                        android:text="مشخصات فردی"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+
+                    <ImageButton
+                        android:id="@+id/personalInfo_setting"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentLeft="true"
+                        android:layout_marginTop="13dp"
+                        android:background="?selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_more_vert_white_24dp"
+                        android:tint="@android:color/white" />
+
+                </RelativeLayout>
+            </android.support.v7.widget.Toolbar>
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="20dp">
+
+
+            <EditText
+                android:id="@+id/dr_FirstName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:hint="@string/drFirstName"
+                android:inputType="textPersonName|textNoSuggestions"
+                android:maxLength="20"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_LastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:hint="@string/drLastName"
+                android:inputType="textPersonName|textNoSuggestions"
+                android:maxLength="20"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_Mobile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:hint="@string/drMobile"
+                android:inputType="phone|textNoSuggestions"
+                android:maxLength="11"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_email"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:hint="ایمیل(اختیاری)"
+                android:inputType="textEmailAddress|textNoSuggestions"
+                android:maxLength="100"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_UserName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:digits="0123456789"
+                android:hint="@string/drUserName"
+                android:inputType="number|textNoSuggestions"
+                android:maxLength="10"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_Password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:gravity="end"
+                android:hint="@string/drPassword"
+                android:inputType="textPassword|textNoSuggestions"
+                android:maxLength="100"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <EditText
+                android:id="@+id/dr_ConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_edit_text"
+                android:gravity="end"
+                android:hint="@string/drConfirmPassword"
+                android:inputType="textPassword|textNoSuggestions"
+                android:maxLength="100"
+                android:maxLines="1"
+                android:padding="8dp" />
+
+            <Spinner
+                android:id="@+id/dr_profile_state"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_spinner"></Spinner>
+
+            <Spinner
+                android:id="@+id/dr_profile_city"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/my_spinner"></Spinner>
+
+            <Button
+                android:id="@+id/dr_btnPersonalInfoInsert"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                android:layout_marginTop="20dp"
+                android:background="@drawable/my_button"
+                android:text="@string/personalInfo_btn_insert"
+                android:textColor="@android:color/white"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/dr_btnImgProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:src="@drawable/ic_add_a_photo_black_48dp"
+        android:tint="@android:color/white"
+        app:backgroundTint="@color/cameracolor"
+        app:layout_anchor="@id/app_bar_layout"
+        app:layout_anchorGravity="bottom|left|start" />
+</android.support.design.widget.CoordinatorLayout>

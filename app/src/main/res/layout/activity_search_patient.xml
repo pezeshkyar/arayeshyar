@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:orientation="vertical"
+    android:layout_height="match_parent">
+
+   <include layout="@layout/my_toolbar"/>
+
+    <LinearLayout
+        android:id="@+id/searchPatient_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:orientation="vertical">
+
+        <EditText
+            android:id="@+id/searchPatient_username"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/my_edit_text"
+            android:hint="کد ملی"
+            android:inputType="text|textNoSuggestions"
+            android:padding="8dp"
+            android:textColor="@color/textColor" />
+
+        <EditText
+            android:id="@+id/searchPatient_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/my_edit_text"
+            android:hint="نام"
+            android:inputType="text|textNoSuggestions"
+            android:padding="8dp"
+            android:textColor="@color/textColor" />
+
+        <EditText
+            android:id="@+id/searchPatient_family"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/my_edit_text"
+            android:hint="نام خانوادگی"
+            android:inputType="text|textNoSuggestions"
+            android:padding="8dp"
+            android:textColor="@color/textColor" />
+
+        <EditText
+            android:id="@+id/searchPatient_mobile"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/my_edit_text"
+            android:digits="0123456789"
+            android:hint="شماره موبایل"
+            android:inputType="number|textNoSuggestions"
+            android:maxLength="11"
+            android:padding="8dp"
+            android:textColor="@color/textColor" />
+
+        <Button
+            android:id="@+id/searchPatient_btnSearch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/my_add_button"
+            android:text="جستجو"
+            android:textColor="@android:color/white" />
+
+        <ListView
+            android:id="@+id/searchPatient_listView"
+            android:dividerHeight="0.5dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp">
+
+        </ListView>
+
+    </LinearLayout>
+</LinearLayout>

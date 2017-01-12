@@ -1,0 +1,15 @@
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.example.doctorsbuilding.nav.Util.NonScrollExpanableListView
+        android:id="@+id/lvExp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:childDivider="#eeeeee"
+        android:groupIndicator="@null"
+        android:dividerHeight="1dp"
+        android:padding="0dp">
+    </com.example.doctorsbuilding.nav.Util.NonScrollExpanableListView>
+</android.support.v4.widget.NestedScrollView>
+
+

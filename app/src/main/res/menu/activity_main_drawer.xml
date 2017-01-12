@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/nav2_secretary"
+        android:icon="@drawable/ic_secretary_manage"
+        android:title="مدیریت منشی" />
+    <item
+        android:id="@+id/nav2_reception"
+        android:icon="@drawable/ic_patients"
+        android:title="لیست پذیرش" />
+    <item
+        android:id="@+id/nav2_notification"
+        android:icon="@drawable/ic_notifications"
+        android:title="اطلاعیه" />
+    <item
+        android:id="@+id/nav2_clinic"
+        android:icon="@drawable/ic_menu_home"
+        android:title="مشخصات آرایشگاه" />
+    <item
+        android:id="@+id/nav2_map"
+        android:icon="@drawable/ic_location"
+        android:title="نقشه آرایشگاه" />
+    <item
+        android:id="@+id/nav2_taskes"
+        android:icon="@drawable/ic_needle_black_24"
+        android:title="خدمات آرایشگاه" />
+    <item
+        android:id="@+id/nav2_question"
+        android:icon="@drawable/ic_questions"
+        android:title="کاردکس" />
+    <item
+        android:id="@+id/nav2_addTurn"
+        android:icon="@drawable/ic_get_turn_black_24dp"
+        android:title="دریافت نوبت" />
+    <item
+        android:id="@+id/nav2_gallery"
+        android:icon="@drawable/ic_gallery"
+        android:title="گالری عکس" />
+    <item
+        android:id="@+id/nav2_news"
+        android:icon="@drawable/ic_menu_news"
+        android:title="خبرنامه" />
+    <item
+        android:id="@+id/nav2_user_patientFile"
+        android:icon="@drawable/ic_assignment_black_24dp"
+        android:title="سوابق آرایشی" />
+    <item
+        android:id="@+id/nav2_patientFile"
+        android:icon="@drawable/ic_patient_file_black_24"
+        android:title="سابقه مشتری" />
+    <item
+        android:id="@+id/nav2_my_nobat"
+        android:icon="@drawable/ic_nobat"
+        android:title="نوبت های من" />
+    <item
+        android:id="@+id/nav2_manage_nobat"
+        android:icon="@drawable/ic_timetable_black_24"
+        android:title="مدیریت نوبت دهی" />
+</menu>

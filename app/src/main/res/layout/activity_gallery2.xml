@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <include layout="@layout/my_toolbar" android:id="@+id/gallery2_actionBar"/>
+
+    <!--<android.support.v4.widget.NestedScrollView-->
+    <!--android:id="@+id/gallery2_scrollView"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:layout_weight="1">-->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <ListView
+            android:id="@+id/gallery2_listView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:dividerHeight="0dp">
+
+        </ListView>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <ProgressBar
+                android:id="@+id/loading_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center" />
+        </FrameLayout>
+    </FrameLayout>
+
+
+    <!--</android.support.v4.widget.NestedScrollView>-->
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#9f9fa3" />
+
+    <RelativeLayout
+        android:id="@+id/gallery2_insert_layout"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:paddingBottom="3dp"
+        android:paddingLeft="8dp"
+        android:paddingRight="8dp"
+        android:paddingTop="3dp"
+        android:visibility="gone">
+
+        <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            tools:context=".gallery2">
+
+            <EditText
+                android:id="@+id/gallery2_about"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginLeft="20dp"
+                android:background="@android:color/transparent"
+                android:hint="درباره عکس ..."
+                android:inputType="textMultiLine|textNoSuggestions"
+                android:maxLength="250"
+                android:maxLines="5"
+                android:padding="8dp"
+                android:paddingRight="10dp"
+                android:textSize="14sp"
+                app:layout_heightPercent="100%"
+                app:layout_widthPercent="90%" />
+
+            <ImageView
+                android:id="@+id/gallery2_apply_image"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/ic_gallery2"
+                android:tint="@color/colorAccent"
+                app:layout_widthPercent="10%" />
+
+            <ImageView
+                android:id="@+id/gallery2_apply_edit"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_alignParentLeft="true"
+                android:src="@drawable/ic_edit"
+                android:tint="@color/colorAccent"
+                android:visibility="gone"
+                app:layout_widthPercent="10%" />
+
+
+        </android.support.percent.PercentRelativeLayout>
+
+    </RelativeLayout>
+</LinearLayout>

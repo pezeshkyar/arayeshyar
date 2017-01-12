@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+    android:padding="8dp">
+    <TextView
+        android:id="@+id/lbl_groupItem"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingRight="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="10dp"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@color/textColor"/>
+    <ImageView
+        android:id="@+id/turns_ic_expand_more"
+        android:background="@drawable/ic_expand_more"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_alignParentLeft="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <ImageView
+        android:id="@+id/turns_ic_expand_less"
+        android:background="@drawable/ic_expand_less"
+        android:visibility="gone"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="8dp"
+        android:layout_alignParentLeft="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+</RelativeLayout>

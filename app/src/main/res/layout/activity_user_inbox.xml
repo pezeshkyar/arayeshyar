@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMainContent"
+    android:orientation="vertical"
+    android:scrollbars="none">
+
+    <include layout="@layout/my_toolbar" />
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="10dp">
+
+        <com.example.doctorsbuilding.nav.Util.NonScrollListView
+            android:id="@+id/userInbox_listView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:divider="@color/colorMainContent"
+            android:dividerHeight="8dp"
+            android:paddingLeft="@dimen/my_padding"
+            android:paddingRight="@dimen/my_padding"></com.example.doctorsbuilding.nav.Util.NonScrollListView>
+    </android.support.v4.widget.NestedScrollView>
+
+
+</LinearLayout>
