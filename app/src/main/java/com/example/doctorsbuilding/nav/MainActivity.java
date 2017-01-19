@@ -370,6 +370,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     case R.id.nav2_news:
                         startActivity(new Intent(MainActivity.this, UserNewsActivity.class));
                         break;
+                    case R.id.nav2_assistant:
+                        startActivity(new Intent(MainActivity.this, ActivityAssistant.class));
+                        break;
                     default:
                         break;
                 }
@@ -411,6 +414,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case secretary:
                 menu = UserType.secretary;
+                break;
+            case Assistant:
+                menu = UserType.Assistant;
                 break;
             case None:
                 menu = UserType.Guest;
@@ -458,6 +464,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 menuItems.add(menu.findItem(R.id.nav2_map));
                 menuItems.add(menu.findItem(R.id.nav2_secretary));
                 menuItems.add(menu.findItem(R.id.nav2_question));
+                menuItems.add(menu.findItem(R.id.nav2_assistant));
                 break;
             case secretary:
                 menuItems.add(menu.findItem(R.id.nav2_addTurn));
@@ -468,6 +475,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 menuItems.add(menu.findItem(R.id.nav2_taskes));
                 menuItems.add(menu.findItem(R.id.nav2_map));
                 menuItems.add(menu.findItem(R.id.nav2_question));
+                menuItems.add(menu.findItem(R.id.nav2_assistant));
                 break;
         }
         adapter_nav.addAll(menuItems);
@@ -491,6 +499,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 break;
             case User:
                 menu_header_version.setText("نسخه مشتری");
+                break;
+            case Assistant:
+                menu_header_version.setText("نسخه دستیار");
                 break;
         }
 

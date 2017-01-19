@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -50,6 +51,7 @@ public class DialogAddTurn extends DialogFragment {
     private int resevationId = -1;
     private Spinner taskGroupSpinner;
     private Spinner taskSpinner;
+    private Spinner assitantSpinner;
     private Button taskBackBtn;
     private Button addTurnBtn;
     private TextView addTurnPatientName;
@@ -75,6 +77,7 @@ public class DialogAddTurn extends DialogFragment {
     private ArrayList<User> users = null;
     private ArrayList<TaskGroup> taskGroups;
     private ArrayAdapter<TaskGroup> taskGroup_adapter;
+    private ArrayAdapter<Assistant> adapter_assistants;
     private int selectedItem = -1;
 
     asyncCallGetTaskes asyncGetTaskes;
@@ -84,6 +87,7 @@ public class DialogAddTurn extends DialogFragment {
     asyncCallReserveForMeWS reserveForMeTask;
     asyncCallReserveForGuestWS reserveForGuestTask;
     asyncCallReserveForGuestFromUserWS reserveForGuestFromUserTask;
+    asyncCallGetAssistants getAssistants;
 
     private DialogCallback dialogCallback;
     private View rootView;
@@ -167,6 +171,9 @@ public class DialogAddTurn extends DialogFragment {
         taskGroup_adapter = new ArrayAdapter<TaskGroup>(context, R.layout.spinner_item);
         taskSpinner.setAdapter(task_adapter);
         taskGroupSpinner.setAdapter(taskGroup_adapter);
+        assitantSpinner = (Spinner) rootView.findViewById(R.id.addTask_assistant);
+        adapter_assistants = new ArrayAdapter<Assistant>(context, R.layout.spinner_item);
+        assitantSpinner.setAdapter(adapter_assistants);
 
         if (G.UserInfo.getRole() == UserType.User.ordinal()) {
             taskBackBtn.setVisibility(View.INVISIBLE);
@@ -218,6 +225,10 @@ public class DialogAddTurn extends DialogFragment {
         if (reserveForGuestFromUserTask != null) {
             reserveForGuestFromUserTask.cancel(true);
             reserveForGuestFromUserTask = null;
+        }
+        if (getAssistants != null) {
+            getAssistants.cancel(true);
+            getAssistants = null;
         }
     }
 
@@ -417,6 +428,9 @@ public class DialogAddTurn extends DialogFragment {
 //                if (asyncGetTaskes == null) {
                 asyncGetTaskes = new asyncCallGetTaskes();
                 asyncGetTaskes.execute();
+
+                getAssistants = new asyncCallGetAssistants();
+                getAssistants.execute();
 //                }
             }
 
@@ -788,7 +802,6 @@ public class DialogAddTurn extends DialogFragment {
             } else {
                 if (taskes != null && taskes.size() != 0) {
                     task_adapter.addAll(taskes);
-                    addTurnBtn.setClickable(true);
                 } else {
                     new MessageBox(context, "زیر گروه خدمات ثبت نشده است .").show();
                 }
@@ -803,6 +816,7 @@ public class DialogAddTurn extends DialogFragment {
         reserve.setFirstReservationId(0);
         reserve.setTaskId(((Task) taskSpinner.getSelectedItem()).getId());
         reserve.setNumberOfTurns(1);
+        reserve.setAssistantUsername(((Assistant) assitantSpinner.getSelectedItem()).getUsername());
         return reserve;
     }
 
@@ -854,4 +868,40 @@ public class DialogAddTurn extends DialogFragment {
         }
     }
 
+    private class asyncCallGetAssistants extends AsyncTask<String, Void, Void> {
+        String msg = null;
+        int taskGroupId;
+        ArrayList<Assistant> assistants = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            taskGroupId = ((TaskGroup) taskGroupSpinner.getSelectedItem()).getId();
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                assistants = WebService.getAssistantOfficeTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, turnData.getId(), taskGroupId);
+            } catch (PException ex) {
+                msg = ex.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (msg != null) {
+                new MessageBox(context, msg).show();
+            } else {
+                if (assistants != null && assistants.size() != 0) {
+                    adapter_assistants.addAll(assistants);
+                    addTurnBtn.setClickable(true);
+                } else {
+                    new MessageBox(context, "هیچ آرایشگری جهت ارئه خدمات وجود ندارد .").show();
+                }
+            }
+        }
+    }
 }

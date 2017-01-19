@@ -321,6 +321,10 @@ public class SignInActivity extends AppCompatActivity {
                             UserType.Dr.attachTo(intent);
                             save(result);
                             break;
+                        case Assistant:
+                            UserType.Assistant.attachTo(intent);
+                            save(result);
+                            break;
                         default:
                             break;
 

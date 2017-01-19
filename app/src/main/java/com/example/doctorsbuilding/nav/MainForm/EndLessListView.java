@@ -106,7 +106,6 @@ public class EndLessListView extends ListView implements OnScrollListener {
 
     public static interface EndlessListener {
         public void loadData();
-
         public void loadImage(int position);
     }
 

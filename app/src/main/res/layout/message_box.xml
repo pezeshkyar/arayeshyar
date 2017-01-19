@@ -23,8 +23,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@android:drawable/stat_sys_warning"
-        android:tint="@color/myyellow" />
+        android:src="@android:drawable/stat_sys_warning" />
 
     <!--<View-->
     <!--android:id="@+id/msgLine"-->
@@ -66,7 +65,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:clickable="true"
         android:text="تایید"
-        android:textColor="@color/colorPrimary" />
+        android:textColor="@android:color/black" />
 
     <Button
         android:id="@+id/msg_positiveButton"
@@ -77,7 +76,7 @@
         android:background="?selectableItemBackgroundBorderless"
         android:clickable="true"
         android:minWidth="0dp"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@android:color/black"
         android:visibility="gone" />
 
     <Button

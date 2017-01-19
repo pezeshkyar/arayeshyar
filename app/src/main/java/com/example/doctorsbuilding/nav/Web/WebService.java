@@ -5,11 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
 
+import com.example.doctorsbuilding.nav.Assistant;
+import com.example.doctorsbuilding.nav.AssistantTiming;
 import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.Expert;
 import com.example.doctorsbuilding.nav.G;
 import com.example.doctorsbuilding.nav.MessageInfo;
 import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.PatientAssistant;
 import com.example.doctorsbuilding.nav.PatientFile;
 import com.example.doctorsbuilding.nav.PatientInfo;
 import com.example.doctorsbuilding.nav.PhotoDesc;
@@ -452,6 +455,66 @@ public class WebService {
             throw new PException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeForUser);
+        Office office = null;
+        ArrayList<Office> offices = null;
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response_test = (SoapObject) envelope.getResponse();
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response_test != null) {
+                offices = new ArrayList<Office>();
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject object = (SoapObject) response.getProperty(i);
+                    if (object != null) {
+                        office = new Office();
+                        office.setId(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                        office.setDrUsername(object.getProperty(Util.getStringWS(R.string.ws_doctorUsername)).toString());
+                        office.setFirstname(object.getProperty(Util.getStringWS(R.string.ws_doctorName)).toString());
+                        office.setLastname(object.getProperty(Util.getStringWS(R.string.ws_doctorLastName)).toString());
+                        office.setCityId(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_cityId)).toString()));
+                        office.setCityName(object.getProperty(Util.getStringWS(R.string.ws_city)).toString());
+                        office.setStateId(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_provinceId)).toString()));
+                        office.setStateName(object.getProperty(Util.getStringWS(R.string.ws_province)).toString());
+                        office.setExpertId(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_specId)).toString()));
+                        office.setExpertName(object.getProperty(Util.getStringWS(R.string.ws_spec)).toString());
+                        office.setSubExpertId(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_subspecId)).toString()));
+                        office.setSubExpertName(object.getProperty(Util.getStringWS(R.string.ws_subSpec)).toString());
+                        office.setAddress(object.getProperty(Util.getStringWS(R.string.ws_address)).toString());
+                        office.setPhone(object.getProperty(Util.getStringWS(R.string.ws_tellNo)).toString());
+                        office.setLatitude(Double.parseDouble(object.getProperty(Util.getStringWS(R.string.ws_latitude)).toString()));
+                        office.setLongitude(Double.parseDouble(object.getProperty(Util.getStringWS(R.string.ws_longitude)).toString()));
+                        try {
+                            office.setBiography(object.getProperty(Util.getStringWS(R.string.ws_biograophy)).toString());
+                        } catch (Exception e) {
+                            office.setBiography("");
+                        }
+                        office.setTimeQuantum(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_timeQuantum)).toString()));
+                        offices.add(office);
+                    }
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return offices;
+    }
+
+    public static ArrayList<Office> invokeGetOfficeForAssistantWS(String username, String password) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getOfficeForBarber);
         Office office = null;
         ArrayList<Office> offices = null;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
@@ -989,7 +1052,7 @@ public class WebService {
         request.addProperty(Util.getStringWS(R.string.ws_taskId), reservation.getTaskId());
         request.addProperty(Util.getStringWS(R.string.ws_numberOfTurns), reservation.getNumberOfTurns());
         request.addProperty(Util.getStringWS(R.string.ws_patientUserName), reservation.getPatientUserName());
-
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), reservation.getAssistantUsername());
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
         HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
@@ -1265,6 +1328,8 @@ public class WebService {
         request.addProperty(Util.getStringWS(R.string.ws_patientLastName), reservation.getPatientLastName());
         request.addProperty(Util.getStringWS(R.string.ws_patientPhoneNo), reservation.getPatientPhoneNo());
         request.addProperty(Util.getStringWS(R.string.ws_patientCityId), cityId);
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), reservation.getAssistantUsername());
+
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
@@ -1329,6 +1394,8 @@ public class WebService {
         request.addProperty(Util.getStringWS(R.string.ws_patientPhoneNo), reservation.getPatientPhoneNo());
         request.addProperty(Util.getStringWS(R.string.ws_patientCityId), reservation.getCityId());
         request.addProperty(Util.getStringWS(R.string.ws_resNum), resNum);
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), reservation.getAssistantUsername());
+
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
@@ -1361,6 +1428,8 @@ public class WebService {
         request.addProperty(Util.getStringWS(R.string.ws_taskId), reservation.getTaskId());
         request.addProperty(Util.getStringWS(R.string.ws_numberOfTurns), reservation.getNumberOfTurns());
         request.addProperty(Util.getStringWS(R.string.ws_resNum), resNum);
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), reservation.getAssistantUsername());
+
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
@@ -3302,5 +3371,370 @@ public class WebService {
         }
 
         return versionInfo;
+    }
+
+    public static Assistant setAssistantWS(String username, String password
+            , int officeId, String assistantUsername, int taskGroupId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_setBarber);
+        Assistant assistant = null;
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), assistantUsername);
+        request.addProperty(Util.getStringWS(R.string.ws_taskGroupId), taskGroupId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.getResponse();
+            if (response != null) {
+                assistant = new Assistant();
+                assistant.setErrorCode(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_errorCode)).toString()));
+                if (assistant.getErrorCode() != -1) {
+                    assistant.setId(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                    assistant.setTaskGroupId(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_taskGroupId)).toString()));
+                    assistant.setName(response.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                    assistant.setFamily(response.getProperty(Util.getStringWS(R.string.ws_lastname)).toString());
+                    assistant.setUsername(response.getProperty(Util.getStringWS(R.string.ws_username)).toString());
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return assistant;
+    }
+
+    public static boolean deleteAssistantWS(String username, String password
+            , int officeId, int assistantId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_deleteBarber);
+        boolean result = false;
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_assistantId), assistantId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
+            result = Boolean.valueOf(response.toString());
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return result;
+    }
+
+    public static ArrayList<Assistant> getAssistantOfficeWS(String username, String password, int officeId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getBarberOffice);
+        Assistant assistant = null;
+        ArrayList<Assistant> assistants = new ArrayList<Assistant>();
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        PropertyInfo property = new PropertyInfo();
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            for (int i = 0; i < response.getPropertyCount(); i++) {
+                SoapObject obj = (SoapObject) response.getProperty(i);
+                if (obj != null) {
+                    assistant = new Assistant();
+                    assistant.setErrorCode(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_errorCode)).toString()));
+                    if (assistant.getErrorCode() != -1) {
+                        assistant.setId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                        assistant.setTaskGroupId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_taskGroupId)).toString()));
+                        assistant.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                        assistant.setFamily(obj.getProperty(Util.getStringWS(R.string.ws_lastname)).toString());
+                        assistant.setUsername(obj.getProperty(Util.getStringWS(R.string.ws_username)).toString());
+                    }
+                    assistants.add(assistant);
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return assistants;
+    }
+
+    public static ArrayList<Integer> setAssistantTimeWS(String username, String password
+            , int officeId, String assistantUsername, int taskGroupId, String date, int hour, int minute, int duration) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_setBarberTime);
+        ArrayList<Integer> result = null;
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_barberUsername), assistantUsername);
+        request.addProperty(Util.getStringWS(R.string.ws_taskGroupId), taskGroupId);
+        request.addProperty(Util.getStringWS(R.string.ws_date), date);
+        request.addProperty(Util.getStringWS(R.string.ws_hour), hour);
+        request.addProperty(Util.getStringWS(R.string.ws_min), minute);
+        request.addProperty(Util.getStringWS(R.string.ws_duration), duration);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response != null) {
+                result = new ArrayList<Integer>();
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapPrimitive obj = (SoapPrimitive) response.getProperty(i);
+                    result.add(Integer.parseInt(obj.toString()));
+                }
+            }
+
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return result;
+    }
+
+    public static boolean removeAssistantTimeWS(String username, String password
+            , int officeId, int assistantId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_deleteBarberTime);
+        boolean result = false;
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_barberTimeId), assistantId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
+            result = Boolean.valueOf(response.toString());
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return result;
+    }
+
+    public static ArrayList<AssistantTiming> getAssistantTimeListWS(String username, String password, int officeId, int assistantId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getBarberOfficeTime);
+        AssistantTiming timing = null;
+        ArrayList<AssistantTiming> timings = new ArrayList<AssistantTiming>();
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_id), assistantId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response != null) {
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject obj = (SoapObject) response.getProperty(i);
+                    if (obj != null) {
+                        timing = new AssistantTiming();
+                        timing.setId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                        timing.setAssistantId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_barberId)).toString()));
+                        timing.setDate(obj.getProperty(Util.getStringWS(R.string.ws_date)).toString().charAt(0));
+                        timing.setHour(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_hour)).toString()));
+                        timing.setMinute(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_min)).toString()));
+                        timing.setDuration(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_duration)).toString()));
+                    }
+                    timings.add(timing);
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return timings;
+    }
+
+    public static ArrayList<Assistant> getAssistantOfficeTaskWS(String username, String password, int officeId, int turnId, int taskGroupId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getBarberOfficeTask);
+        Assistant assistant = null;
+        ArrayList<Assistant> assistants = new ArrayList<Assistant>();
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_turnId), turnId);
+        request.addProperty(Util.getStringWS(R.string.ws_taskGroupId), taskGroupId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response != null) {
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject obj = (SoapObject) response.getProperty(i);
+                    if (obj != null) {
+                        assistant = new Assistant();
+                        assistant.setErrorCode(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_errorCode)).toString()));
+                        if (assistant.getErrorCode() != -1) {
+                            assistant.setId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                            assistant.setTaskGroupId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_taskGroupId)).toString()));
+                            assistant.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                            assistant.setFamily(obj.getProperty(Util.getStringWS(R.string.ws_lastname)).toString());
+                            assistant.setUsername(obj.getProperty(Util.getStringWS(R.string.ws_username)).toString());
+                        }
+                        assistants.add(assistant);
+                    }
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+        return assistants;
+    }
+
+    public static ArrayList<PatientAssistant> invokeGetTodayPatientAssistantWS(String username, String password, int officeId) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        PatientAssistant patientInfo = null;
+        ArrayList<PatientAssistant> patientInfos = new ArrayList<PatientAssistant>();
+        String webMethName = Util.getStringWS(R.string.ws_getReserveUserForBarberToday);
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response != null) {
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject obj = (SoapObject) response.getProperty(i);
+                    if (obj != null) {
+                        patientInfo = new PatientAssistant();
+                        patientInfo.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                        patientInfo.setLastname(obj.getProperty(Util.getStringWS(R.string.ws_lastName)).toString());
+                        patientInfo.setHour(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_hour)).toString()));
+                        patientInfo.setMin(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_min)).toString()));
+                        patientInfo.setDuration(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_duration)).toString()));
+                        patientInfos.add(patientInfo);
+                    }
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+
+        return patientInfos;
+    }
+
+    public static ArrayList<PatientAssistant> invokeGetPatientAssistantWS(String username, String password, int officeId, String date) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        PatientAssistant patientInfo = null;
+        ArrayList<PatientAssistant> patientInfos = new ArrayList<PatientAssistant>();
+        String webMethName = Util.getStringWS(R.string.ws_getReserveUserForBarber);
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_date), date);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response != null) {
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject obj = (SoapObject) response.getProperty(i);
+                    if (obj != null) {
+                        patientInfo = new PatientAssistant();
+                        patientInfo.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                        patientInfo.setLastname(obj.getProperty(Util.getStringWS(R.string.ws_lastName)).toString());
+                        patientInfo.setHour(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_hour)).toString()));
+                        patientInfo.setMin(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_min)).toString()));
+                        patientInfo.setDuration(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_duration)).toString()));
+                        patientInfos.add(patientInfo);
+                    }
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+
+        return patientInfos;
     }
 }

@@ -10,7 +10,8 @@ public enum UserType {
     Dr(1),
     User(2),
     secretary(3),
-    Guest(4);
+    Guest(4),
+    Assistant(5);
     private final int userType;
     private static final String name = UserType.class.getName();
 

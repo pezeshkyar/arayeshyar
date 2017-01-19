@@ -76,9 +76,6 @@ public class ActivityUpdate extends AppCompatActivity {
     }
 
     private void initViews() {
-        ImageView imageView = (ImageView) findViewById(R.id.mPro);
-        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
-        imageView.startAnimation(pulse);
         btn_wifi = (Button) findViewById(R.id.app_loading_wifi);
         btn_mobiledata = (Button) findViewById(R.id.app_loading_mobildata);
         btn_reconect = (Button) findViewById(R.id.app_loading_reconect);
@@ -273,7 +270,7 @@ public class ActivityUpdate extends AppCompatActivity {
                 if (progress == 100) {
                     mProgressDialog.dismiss();
                     Intent intent = new Intent(Intent.ACTION_VIEW);
-                    String path = Environment.getExternalStorageDirectory() + "/download/" + "pezeshkyar.apk";
+                    String path = Environment.getExternalStorageDirectory() + "/download/" + "arayeshyar.apk";
                     intent.setDataAndType(Uri.fromFile(new File(path)), "application/vnd.android.package-archive");
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);

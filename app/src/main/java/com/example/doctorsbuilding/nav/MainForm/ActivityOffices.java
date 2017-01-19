@@ -95,6 +95,7 @@ public class ActivityOffices extends AppCompatActivity {
     AsyncGetDoctorPic task_getDoctorPic = null;
     AsyncGetOfficeForDoctorOrSercretary task_getOfficeForDoctorOrSercretary;
     AsyncCallGetUnreadMessagesWs task_unreadMessages;
+    AsyncGetOfficeForAssistant task_getOfficeForAssistant;
     private CustomNavListView adapter_nav;
     private ListView menu_listview;
     private ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
@@ -131,7 +132,9 @@ public class ActivityOffices extends AppCompatActivity {
             task_unreadMessages = new AsyncCallGetUnreadMessagesWs();
             task_unreadMessages.execute();
             if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-                setUserLayout(false);
+                    setUserLayout(false);
+            }else if(G.UserInfo.getRole() == UserType.Assistant.ordinal()){
+                setAssistantLayout(false);
             }
         }
 
@@ -158,6 +161,8 @@ public class ActivityOffices extends AppCompatActivity {
         if (task_unreadMessages != null) {
             task_unreadMessages.cancel(true);
         }
+        if(task_getOfficeForAssistant != null)
+            task_getOfficeForAssistant.cancel(true);
     }
 
     private void initActivity() {
@@ -173,6 +178,8 @@ public class ActivityOffices extends AppCompatActivity {
 
             else if (user == UserType.User)
                 setUserLayout(false);
+            else if(user == UserType.Assistant)
+                setAssistantLayout(false);
 
         } else {
             setWellcomeLayout();
@@ -325,7 +332,7 @@ public class ActivityOffices extends AppCompatActivity {
             menuItems.add(menu.findItem(R.id.nav1_signUp));
 //            menuItems.add(menu.findItem(R.id.nav1_intro));
             menuItems.add(menu.findItem(R.id.nav1_about));
-        } else if (user == UserType.User) {
+        } else if (user == UserType.User || user == UserType.Assistant) {
             menuItems.add(menu.findItem(R.id.nav1_account));
             menuItems.add(menu.findItem(R.id.nav1_etebar));
             menuItems.add(menu.findItem(R.id.nav1_inbox));
@@ -362,13 +369,16 @@ public class ActivityOffices extends AppCompatActivity {
 
         switch (menu) {
             case Dr:
-                menu_header_version.setText("نسخه آرایشگر");
+                menu_header_version.setText("آرایشگر");
                 break;
             case secretary:
                 menu_header_version.setText("نسخه منشی");
                 break;
             case User:
                 menu_header_version.setText("نسخه مشتری");
+                break;
+            case Assistant:
+                menu_header_version.setText("نسخه دستیار");
                 break;
         }
 
@@ -389,6 +399,8 @@ public class ActivityOffices extends AppCompatActivity {
 
                     setUserLayout(true);
 
+                }else if(G.UserInfo.getRole() == UserType.Assistant.ordinal()){
+                    setAssistantLayout(true);
                 }
 
             }
@@ -506,6 +518,36 @@ public class ActivityOffices extends AppCompatActivity {
         addButton.setVisibility(View.VISIBLE);
     }
 
+    private void setAssistantLayout(boolean readDataFromWeb) {
+        unreadMessageLayout.setVisibility(View.VISIBLE);
+        welcomePage.setVisibility(View.GONE);
+        addButton.setVisibility(View.GONE);
+        mViewFlipper.setVisibility(View.VISIBLE);
+        mViewFlipper.setDisplayedChild(MY_DOCTOR);
+        doctorsListView.setEnabled(false);
+        officesListView.setEnabled(false);
+        if (mNavigation != null && menuItems.size() == 0) {
+            setNavigationViewMenu(UserType.values()[G.getSharedPreferences().getInt("role", 0)]);
+        }
+        if (readDataFromWeb) {
+            task_getOfficeForAssistant = new AsyncGetOfficeForAssistant();
+            task_getOfficeForAssistant.execute();
+
+        } else {
+            if (database.openConnection()) {
+                doctors = database.getoffices();
+                database.closeConnection();
+            }
+            if (doctors != null && doctors.size() > 0) {
+                adapter_doctors.addAll(doctors);
+            }
+        }
+        doctorsListView.setEnabled(true);
+        officesListView.setEnabled(true);
+        addButton.setVisibility(View.VISIBLE);
+    }
+
+
     private void setDoctorLayout(boolean readDataFromWeb) {
         unreadMessageLayout.setVisibility(View.VISIBLE);
         welcomePage.setVisibility(View.GONE);
@@ -588,6 +630,56 @@ public class ActivityOffices extends AppCompatActivity {
             }
         }
     }
+
+    private class AsyncGetOfficeForAssistant extends AsyncTask<String, Void, Void> {
+        String msg = null;
+        ProgressDialog dialog;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog = ProgressDialog.show(ActivityOffices.this, "", "در حال دریافت اطلاعات شما ...");
+            dialog.show();
+            dialog.getWindow().setGravity(Gravity.END);
+            dialog.setCancelable(true);
+        }
+
+        @Override
+        protected Void doInBackground(String... strings) {
+            try {
+                doctors = WebService.invokeGetOfficeForAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword());
+            } catch (PException ex) {
+                msg = ex.getMessage();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (msg != null) {
+                dialog.dismiss();
+                new MessageBox(ActivityOffices.this, msg).show();
+            } else {
+                dialog.dismiss();
+                if (doctors != null && doctors.size() > 0) {
+                    if (database.openConnection()) {
+                        for (Office of : doctors) {
+                            of.setPhoto(BitmapFactory.decodeResource(getResources(), R.drawable.doctor));
+                            database.insertoffice(of);
+                            adapter_doctors.add(of);
+                        }
+                        database.closeConnection();
+                    }
+                    for (int i = 0; i < doctors.size(); i++) {
+                        task_getDoctorPic = new AsyncGetDoctorPic();
+                        task_getDoctorPic.execute(String.valueOf(i), String.valueOf(MY_DOCTOR));
+                    }
+                }
+            }
+        }
+    }
+
 
     private class AsyncGetOfficeForDoctorOrSercretary extends AsyncTask<String, Void, Void> {
         String msg = null;

@@ -300,4 +300,21 @@
     <string name="ws_nothingFromServer">هیچ جوابی از سرور دریافت نشده است !</string>
     <string name="ws_otherMessage">خطایی در ارتباط با سرور رخ داده است !</string>
     <string name="ws_isOnlineMessage">دسترسی به اینترنت امکان پذیر نمی باشد، لطفا تنظیمات اینترنت خود را چک نمایید .</string>
+    <string name="ws_setBarber">setBarber</string>
+    <string name="ws_barberUsername">barberUsername</string>
+    <string name="ws_deleteBarber">deleteBarber</string>
+    <string name="ws_errorCode">errorCode</string>
+    <string name="ws_assistantId">assistantId</string>
+    <string name="ws_getBarberOffice">getBarberOffice</string>
+    <string name="ws_setBarberTime">setBarberTime</string>
+    <string name="ws_deleteBarberTime">deleteBarberTime</string>
+    <string name="ws_barberTime">barberTime</string>
+    <string name="ws_barberTimeId">barberTimeId</string>
+    <string name="ws_getBarberTimeList">getBarberTimeList</string>
+    <string name="ws_getBarberOfficeTime">getBarberOfficeTime</string>
+    <string name="ws_barberId">barberId</string>
+    <string name="ws_getBarberOfficeTask">getBarberOfficeTask</string>
+    <string name="ws_getReserveUserForBarberToday">getReserveUserForBarberToday</string>
+    <string name="ws_getReserveUserForBarber">getReserveUserForBarber</string>
+    <string name="ws_getOfficeForBarber">getOfficeForBarber</string>
 </resources>

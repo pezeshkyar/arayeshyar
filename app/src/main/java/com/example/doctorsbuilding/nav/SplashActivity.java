@@ -32,7 +32,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class SplashActivity extends AppCompatActivity {
     TextView splashTv;
-    ImageView  progressBar;
+    ProgressBar progressBar;
     public UserType menu = UserType.None;
     DatabaseAdapter database;
     AsyncCallGetData asyncCallGetData = null;
@@ -45,7 +45,7 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         splashTv = (TextView) findViewById(R.id.splash_tv);
-        progressBar = (ImageView ) findViewById(R.id.splash_heart);
+        progressBar = (ProgressBar) findViewById(R.id.splash_heart);
         progressBar.setVisibility(View.VISIBLE);
         loadData();
         database = new DatabaseAdapter(SplashActivity.this);
@@ -89,11 +89,13 @@ public class SplashActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 G.UserInfo.setRole(WebService.invokeGetRoleInOfficeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId));
-                doctorPic = WebService.invokeGetDoctorPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-                G.officeInfo = WebService.invokeGetOfficeInfoWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
+                if (G.UserInfo.getRole() != UserType.Assistant.ordinal()) {
+                    doctorPic = WebService.invokeGetDoctorPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
+                    G.officeInfo = WebService.invokeGetOfficeInfoWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
+                }
             } catch (PException ex) {
                 msg = ex.getMessage();
-            } catch (Throwable ex){
+            } catch (Throwable ex) {
                 msg = ex.getMessage();
             }
 
@@ -111,27 +113,31 @@ public class SplashActivity extends AppCompatActivity {
                 if (G.UserInfo.getRole() == UserType.None.ordinal()) {
                     result = false;
                 }
-                if (G.officeInfo != null) {
-                    if (doctorPic == null)
-                        doctorPic = BitmapFactory.decodeResource(SplashActivity.this.getResources(), R.drawable.doctor);
+                if (G.UserInfo.getRole() != UserType.Assistant.ordinal()) {
+                    if (G.officeInfo != null) {
+                        if (doctorPic == null)
+                            doctorPic = BitmapFactory.decodeResource(SplashActivity.this.getResources(), R.drawable.doctor);
 
-                    G.officeInfo.setPhoto(doctorPic);
-                    if (currentRole == G.UserInfo.getRole()) {
-                        G.officeInfo.setMyOffice(true);
+                        G.officeInfo.setPhoto(doctorPic);
+                        if (currentRole == G.UserInfo.getRole()) {
+                            G.officeInfo.setMyOffice(true);
+                        } else {
+                            G.officeInfo.setMyOffice(false);
+                        }
+                        database = new DatabaseAdapter(SplashActivity.this);
+                        if (database.openConnection()) {
+                            database.updateOffice(G.officeId, G.officeInfo);
+                            database.closeConnection();
+                        }
+
                     } else {
-                        G.officeInfo.setMyOffice(false);
+                        result = false;
                     }
-                    database = new DatabaseAdapter(SplashActivity.this);
-                    if (database.openConnection()) {
-                        database.updateOffice(G.officeId, G.officeInfo);
-                        database.closeConnection();
+                    if (result) {
+                        startActivity(new Intent(SplashActivity.this, MainActivity.class));
                     }
-
-                } else {
-                    result = false;
-                }
-                if (result) {
-                    startActivity(new Intent(SplashActivity.this, MainActivity.class));
+                }else {
+                    startActivity(new Intent(SplashActivity.this, ActivityPatientAssistant.class));
                 }
                 finish();
             }

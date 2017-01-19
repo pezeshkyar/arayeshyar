@@ -226,6 +226,16 @@
             android:screenOrientation="portrait"
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ActivityAssistant"
+            android:screenOrientation="portrait"
+            android:theme="@style/MyTheme"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ActivityPatientAssistant"
+            android:screenOrientation="portrait"
+            android:theme="@style/MyTheme"
+            android:windowSoftInputMode="stateHidden" />
     </application>
 
 </manifest>

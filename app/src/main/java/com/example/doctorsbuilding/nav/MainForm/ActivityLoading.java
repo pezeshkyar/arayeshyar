@@ -67,9 +67,7 @@ public class ActivityLoading extends AppCompatActivity {
     }
 
     private void initViews() {
-        ImageView imageView = (ImageView) findViewById(R.id.mPro);
-        Animation pulse = AnimationUtils.loadAnimation(this, R.anim.pulse);
-        imageView.startAnimation(pulse);
+
     }
 
     @Override

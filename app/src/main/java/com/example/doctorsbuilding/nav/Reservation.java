@@ -5,6 +5,7 @@ package com.example.doctorsbuilding.nav;
  */
 public class Reservation {
     int id;
+    String assistantUsername;
     String username;
     String date;
     String time;
@@ -147,5 +148,13 @@ public class Reservation {
 
     public void setCityId(int cityId) {
         this.cityId = cityId;
+    }
+
+    public String getAssistantUsername() {
+        return assistantUsername;
+    }
+
+    public void setAssistantUsername(String assistantUsername) {
+        this.assistantUsername = assistantUsername;
     }
 }

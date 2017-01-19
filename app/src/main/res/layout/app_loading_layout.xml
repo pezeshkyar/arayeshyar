@@ -32,13 +32,11 @@
                 android:textColor="@android:color/black"
                 android:text="سامانه جامع زیبایی در کشور" />
 
-            <ImageView
+            <ProgressBar
                 android:id="@+id/mPro"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_arayeshyar"
-                android:tint="@color/colorAccent" />
+                android:layout_gravity="center" />
         </LinearLayout>
     </FrameLayout>
 

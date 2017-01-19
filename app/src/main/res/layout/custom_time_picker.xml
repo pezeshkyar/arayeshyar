@@ -5,17 +5,12 @@
     <TextView
         android:text="انتخاب زمان"
         android:layout_margin="8dp"
+        android:layout_gravity="right"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="@android:color/holo_blue_light"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-    <View
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:background="@android:color/holo_blue_light"
-        android:layout_width="match_parent"
-        android:layout_height="2dp"/>
     <TimePicker
         android:id="@+id/timePicker"
         android:descendantFocusability="blocksDescendants"
