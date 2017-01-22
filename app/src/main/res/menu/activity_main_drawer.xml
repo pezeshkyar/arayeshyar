@@ -8,7 +8,7 @@
     <item
         android:id="@+id/nav2_assistant"
         android:icon="@drawable/ic_secretary_manage"
-        android:title="مدیریت آرایشگر" />
+        android:title="مدیریت همکار آرایشی" />
     <item
         android:id="@+id/nav2_reception"
         android:icon="@drawable/ic_patients"

@@ -463,8 +463,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 menuItems.add(menu.findItem(R.id.nav2_taskes));
                 menuItems.add(menu.findItem(R.id.nav2_map));
                 menuItems.add(menu.findItem(R.id.nav2_secretary));
-                menuItems.add(menu.findItem(R.id.nav2_question));
                 menuItems.add(menu.findItem(R.id.nav2_assistant));
+                menuItems.add(menu.findItem(R.id.nav2_question));
                 break;
             case secretary:
                 menuItems.add(menu.findItem(R.id.nav2_addTurn));
@@ -474,8 +474,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 menuItems.add(menu.findItem(R.id.nav2_clinic));
                 menuItems.add(menu.findItem(R.id.nav2_taskes));
                 menuItems.add(menu.findItem(R.id.nav2_map));
-                menuItems.add(menu.findItem(R.id.nav2_question));
                 menuItems.add(menu.findItem(R.id.nav2_assistant));
+                menuItems.add(menu.findItem(R.id.nav2_question));
                 break;
         }
         adapter_nav.addAll(menuItems);
@@ -501,7 +501,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 menu_header_version.setText("نسخه مشتری");
                 break;
             case Assistant:
-                menu_header_version.setText("نسخه دستیار");
+                menu_header_version.setText("نسخه همکار آرایشی");
                 break;
         }
 

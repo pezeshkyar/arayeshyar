@@ -164,8 +164,8 @@ public class CustomDoctorsListAdapter extends BaseAdapter {
             }
         };
 
-        MyAlertDialogFragment builder = MyAlertDialogFragment.newInstance("حذف مطب", android.R.drawable.ic_menu_delete
-                , "آیا مطئنید می خواهید این مطب را حذف نمایید؟", "بلی", "خیر");
+        MyAlertDialogFragment builder = MyAlertDialogFragment.newInstance("حذف آرایشگاه", android.R.drawable.ic_menu_delete
+                , "آیا مطئنید می خواهید این آرایشگاه را حذف نمایید؟", "بلی", "خیر");
         builder.setOnClickListener(dialogClickListener).show(((Activity) context).getFragmentManager(), "");
     }
 

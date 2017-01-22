@@ -90,8 +90,8 @@ public class CustomListViewAssitants extends BaseAdapter {
                 }
             }
         };
-        MyAlertDialogFragment builder = MyAlertDialogFragment.newInstance("حذف آرایشکر", android.R.drawable.ic_menu_delete
-                , "شما در حال حذف این آرایشگر می باشید .", "حذف آرایشگر", "انصراف");
+        MyAlertDialogFragment builder = MyAlertDialogFragment.newInstance("حذف همکار آرایشی", android.R.drawable.ic_menu_delete
+                , "شما در حال حذف این  همکار آرایشی می باشید .", "حذف همکار آرایشی", "انصراف");
 
         builder.setOnClickListener(myDialogFrag).show(((Activity) context).getFragmentManager(), "");
         builder.setCancelable(false);

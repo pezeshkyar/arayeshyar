@@ -141,7 +141,7 @@ public class ActivitySearchPatient extends AppCompatActivity {
                     dialog.dismiss();
                 } else {
                     dialog.dismiss();
-                    Toast.makeText(ActivitySearchPatient.this, "مشتری این مشخصات یافت نشده است .", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ActivitySearchPatient.this, "مشتری با این  مشخصات یافت نشده است .", Toast.LENGTH_SHORT).show();
                 }
             }
             searchBtn.setClickable(true);

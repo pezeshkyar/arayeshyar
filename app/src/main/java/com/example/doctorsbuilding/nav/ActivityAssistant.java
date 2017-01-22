@@ -114,7 +114,7 @@ public class ActivityAssistant extends AppCompatActivity {
 
         toolbar = (RelativeLayout) findViewById(R.id.assistant_toolbar);
         pageTitle = (TextView) findViewById(R.id.toolbar_title);
-        pageTitle.setText("مدیریت آرایشگر");
+        pageTitle.setText("مدیریت همکار آرایشی");
         backBtn = (ImageButton) findViewById(R.id.toolbar_backBtn);
         username = (EditText) findViewById(R.id.assistant_meliCode);
         spinner_taskes = (Spinner) findViewById(R.id.assistant_task);

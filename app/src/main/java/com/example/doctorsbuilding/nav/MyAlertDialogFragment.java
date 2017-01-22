@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.text.Html;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -88,7 +89,8 @@ public class MyAlertDialogFragment extends DialogFragment {
 
         title.setText(getArguments().getString("title"));
         icon.setImageResource(getArguments().getInt("icon"));
-        message.setText(getArguments().getString("msg"));
+//        message.setText(getArguments().getString("msg"));
+        message.setText(Html.fromHtml(getArguments().getString("msg")));
         if (getArguments().getString("neutral") == null) {
             neutralButton.setVisibility(View.GONE);
             positiveButton.setVisibility(View.VISIBLE);

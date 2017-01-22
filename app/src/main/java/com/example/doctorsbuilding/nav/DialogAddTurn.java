@@ -487,15 +487,15 @@ public class DialogAddTurn extends DialogFragment {
 
     private boolean checkField() {
         if (nonMemberName.getText().toString().trim().equals("")) {
-            new MessageBox(context, "لطفا نام بیمار را وارد نمایید .").show();
+            new MessageBox(context, "لطفا نام مشتری را وارد نمایید .").show();
             return false;
         }
         if (nonMemberFamily.getText().toString().trim().equals("")) {
-            new MessageBox(context, "لطفا نام خانوادگی بیمار را وارد نمایید .").show();
+            new MessageBox(context, "لطفا نام خانوادگی مشتری را وارد نمایید .").show();
             return false;
         }
         if (nonMemberMobile.getText().toString().trim().equals("")) {
-            new MessageBox(context, "لطفا شماره تلفن همراه بیمار را وارد نمایید .").show();
+            new MessageBox(context, "لطفا شماره تلفن همراه مشتری را وارد نمایید .").show();
             return false;
         }
         return true;
@@ -566,7 +566,7 @@ public class DialogAddTurn extends DialogFragment {
                     dialog.dismiss();
                     memberListView.setAdapter(new CustomReservationListAdapter(context
                             , new ArrayList<ArrayList<String>>(), turnData.getId()));
-                    Toast.makeText(context, "بیماری با این مشخصات یافت نشده است .", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "مشتری با این مشخصات یافت نشده است .", Toast.LENGTH_SHORT).show();
                 }
             }
         }
@@ -766,7 +766,7 @@ public class DialogAddTurn extends DialogFragment {
                     taskGroup_adapter.addAll(taskGroups);
 
                 } else {
-                    new MessageBox(context, "خدماتی برای مطب ثبت نشده است .").show();
+                    new MessageBox(context, "خدماتی برای آرایشگاه ثبت نشده است .").show();
                 }
                 dialog.dismiss();
             }

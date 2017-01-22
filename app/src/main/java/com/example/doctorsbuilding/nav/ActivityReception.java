@@ -93,7 +93,7 @@ public class ActivityReception extends AppCompatActivity {
             nameTxt.setText(patientInfo.getFirstName().concat(" " + patientInfo.getLastName()));
             taskTxt.setText(patientInfo.getTaskGroupName().concat(" - ").concat(patientInfo.getTaskName()));
 
-            txtPayment.setText("مبلغ  ".concat(Util.getCurrency(patientInfo.getPayment())).concat("  ریال توسط بیمار پرداخت شده است ."));
+            txtPayment.setText("مبلغ  ".concat(Util.getCurrency(patientInfo.getPayment())).concat("  ریال توسط مشتری پرداخت شده است ."));
 
             if (!patientInfo.getDescription().equals("") && !patientInfo.getDescription().equals("anyType{}"))
                 detailsTxt.setText(patientInfo.getDescription());

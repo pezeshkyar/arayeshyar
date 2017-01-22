@@ -55,6 +55,7 @@ public class DrNobatActivity extends AppCompatActivity {
     CheckBox chbox3Shanbe;
     CheckBox chbox4Shanbe;
     CheckBox chbox5Shanbe;
+    CheckBox chboxjome;
     NonScrollListView listView;
     int hour, min, duration, capacity;
     String shortStartDate, shortEndDate;
@@ -90,14 +91,14 @@ public class DrNobatActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if(task_addTurn != null)
+        if (task_addTurn != null)
             task_addTurn.cancel(true);
-        if(task_getAllTurn != null)
+        if (task_getAllTurn != null)
             task_getAllTurn.cancel(true);
     }
 
     private void initViews() {
-        pageTitle = (TextView)findViewById(R.id.toolbar_title);
+        pageTitle = (TextView) findViewById(R.id.toolbar_title);
         pageTitle.setText("مدیریت نوبت دهی");
         backBtn = (ImageButton) findViewById(R.id.toolbar_backBtn);
         txtWait = (TextView) findViewById(R.id.nobat_wait);
@@ -110,14 +111,13 @@ public class DrNobatActivity extends AppCompatActivity {
         btnInsert = (Button) findViewById(R.id.dr_btnNobatInsert);
         btnShowTurn = (Button) findViewById(R.id.dr_btnNobatShow);
         listView = (NonScrollListView) findViewById(R.id.nobat_listView);
-        chboxShanbe = (CheckBox) findViewById(R.id.chboxShanbe);
-        chbox1Shanbe = (CheckBox) findViewById(R.id.chbox1Shanbe);
-        chbox2Shanbe = (CheckBox) findViewById(R.id.chbox2Shanbe);
-        chbox3Shanbe = (CheckBox) findViewById(R.id.chbox3Shanbe);
-        chbox4Shanbe = (CheckBox) findViewById(R.id.chbox4Shanbe);
-        chbox5Shanbe = (CheckBox) findViewById(R.id.chbox5Shanbe);
-
-
+        chboxShanbe = (CheckBox) findViewById(R.id.doctor_chx0);
+        chbox1Shanbe = (CheckBox) findViewById(R.id.doctor_chx1);
+        chbox2Shanbe = (CheckBox) findViewById(R.id.doctor_chx2);
+        chbox3Shanbe = (CheckBox) findViewById(R.id.doctor_chx3);
+        chbox4Shanbe = (CheckBox) findViewById(R.id.doctor_chx4);
+        chbox5Shanbe = (CheckBox) findViewById(R.id.doctor_chx5);
+        chboxjome = (CheckBox) findViewById(R.id.doctor_chx6);
     }
 
     private void eventListener() {
@@ -395,6 +395,7 @@ public class DrNobatActivity extends AppCompatActivity {
             dayOfWeek += (chbox3Shanbe.isChecked()) ? "3" : "";
             dayOfWeek += (chbox4Shanbe.isChecked()) ? "4" : "";
             dayOfWeek += (chbox5Shanbe.isChecked()) ? "5" : "";
+            dayOfWeek += (chboxjome.isChecked()) ? "6" : "";
         }
 
         @Override

@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:src="@android:drawable/stat_sys_warning" />
+        android:src="@drawable/ic_warning"
+        android:tint="#fbbc05"/>
 
     <!--<View-->
     <!--android:id="@+id/msgLine"-->

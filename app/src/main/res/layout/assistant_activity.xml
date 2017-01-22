@@ -50,7 +50,7 @@
                 android:layout_margin="10dp"
                 android:background="@drawable/my_add_button"
                 android:drawableLeft="@drawable/ic_arrow_back"
-                android:text="ثبت دستیار"
+                android:text="ثبت همکار آرایشی"
                 android:textColor="@android:color/white"
                 android:textStyle="bold" />
 
@@ -66,7 +66,7 @@
 
         </RelativeLayout>
 
-        <RelativeLayout
+        <android.support.percent.PercentRelativeLayout
             android:id="@+id/assistant_page2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -131,7 +131,7 @@
                     app:layout_widthPercent="49%" />
             </android.support.percent.PercentRelativeLayout>
 
-            <RelativeLayout
+            <android.support.percent.PercentRelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:id="@+id/assistant_weakLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -141,100 +141,107 @@
 
                 <CheckBox
                     android:id="@+id/assistant_chx0"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
-                    android:layout_marginLeft="5dp"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="ش"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_widthPercent="10%" />
 
                 <CheckBox
                     android:id="@+id/assistant_chx1"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx0"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="ی"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%" />
 
                 <CheckBox
                     android:id="@+id/assistant_chx2"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx1"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="د"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%"  />
 
                 <CheckBox
                     android:id="@+id/assistant_chx3"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx2"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="س"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%" />
 
                 <CheckBox
                     android:id="@+id/assistant_chx4"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx3"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="چ"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%"/>
 
                 <CheckBox
                     android:id="@+id/assistant_chx5"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx4"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="پ"
-                    android:textColor="@drawable/text_color" />
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginLeftPercent="2%"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%" />
 
                 <CheckBox
                     android:id="@+id/assistant_chx6"
-                    android:layout_width="33dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginRight="5dp"
                     android:layout_toLeftOf="@+id/assistant_chx5"
                     android:background="@drawable/my_check_box"
                     android:button="@android:color/transparent"
                     android:gravity="center"
                     android:padding="5dp"
                     android:text="ج"
-                    android:textColor="@drawable/text_color" />
-            </RelativeLayout>
+                    android:textColor="@drawable/text_color"
+                    app:layout_marginRightPercent="3%"
+                    app:layout_widthPercent="10%" />
+            </android.support.percent.PercentRelativeLayout>
 
             <Button
                 android:id="@+id/assistant_insertTimeTable"
@@ -257,7 +264,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/my_card_view"></ListView>
 
-        </RelativeLayout>
+        </android.support.percent.PercentRelativeLayout>
     </ViewFlipper>
 
 </LinearLayout>

@@ -48,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:text="دکتر غلام حسین جعفری دولت آبادی"
+            android:text="شقایق محمودی"
             android:textColor="@android:color/black"
             android:textSize="16sp" />
 
@@ -64,7 +64,7 @@
             android:layout_height="wrap_content"
             android:textSize="14sp"
             android:layout_marginBottom="4dp"
-            android:text="فوق تخصص داخلی اطفال" />
+            android:text="آرایشگر حرفه ای" />
 
         <TextView
             android:id="@+id/offices_item_address"

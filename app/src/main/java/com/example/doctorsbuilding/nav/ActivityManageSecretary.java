@@ -3,6 +3,7 @@ package com.example.doctorsbuilding.nav;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.media.MediaRouter;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.widget.TextView;
 
 import com.example.doctorsbuilding.nav.User.User;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.sql.Array;
@@ -92,6 +94,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
 
     private void initView() {
         txt_username = (EditText) findViewById(R.id.manage_secretary_username);
+        txt_username.setRawInputType(Configuration.KEYBOARD_QWERTY);
         btn_add = (Button) findViewById(R.id.manage_secretary_addBtn);
         btn_delete = (Button) findViewById(R.id.manage_secretary_deleteBtn);
         btn_refresh = (ImageView) findViewById(R.id.manage_secretary_refresh);
@@ -148,6 +151,10 @@ public class ActivityManageSecretary extends AppCompatActivity {
     private boolean checkField_add() {
         if (txt_username.getText().toString().trim().equals("")) {
             new MessageBox(ActivityManageSecretary.this, "لطفا نام کاربری منشی را وارد نمایید .").show();
+            return false;
+        }
+        if (!Util.IsValidCodeMeli(txt_username.getText().toString().trim())) {
+            new MessageBox(ActivityManageSecretary.this, "کد ملی وارد شده نادرست می باشد .").show();
             return false;
         }
         return true;

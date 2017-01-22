@@ -278,7 +278,7 @@
     <string name="factor_warn1">در صورت عدم دریافت کد رهگیری از سامانه لطفا از قسمت پشتبانی مشکل را با همکاران ما در میان بگذارید.</string>
     <string name="factor_warn2">امکان لغو نوبت تنها یک روز مانده به نوبت شما فعال می باشد در صورت توجه نکردن به این موضوع عواقب آن مربوط به خود شخص می باشد.</string>
     <string name="factor_txt1">نام و نام خانوادگی : </string>
-    <string name="factor_txt2">نام پزشک : </string>
+    <string name="factor_txt2">نام آرایشگر : </string>
     <string name="factor_txt3">تاریخ مراجعه :</string>
     <string name="factor_txt4">ساعت مراجعه : </string>
     <string name="factor_txt5">مبلغ قابل پرداخت :</string>

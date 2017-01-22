@@ -378,7 +378,7 @@ public class ActivityOffices extends AppCompatActivity {
                 menu_header_version.setText("نسخه مشتری");
                 break;
             case Assistant:
-                menu_header_version.setText("نسخه دستیار");
+                menu_header_version.setText("نسخه همکار آرایشی");
                 break;
         }
 
