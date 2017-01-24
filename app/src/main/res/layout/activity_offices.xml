@@ -178,23 +178,25 @@
 
             <Button
                 android:id="@+id/welcome_signIn"
-                android:layout_width="200dp"
+                android:layout_width="wrap_content"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="20dp"
                 android:background="@drawable/my_button"
-                android:text="ورود به سامانه"
+                android:text="ورود یا عضویت در سامانه"
                 android:textColor="@android:color/white" />
 
-            <Button
-                android:id="@+id/welcome_signUp"
-                android:layout_width="200dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/my_add_button"
-                android:text="عضویت در سامانه"
-                android:textColor="@android:color/white" />
+            <!--<Button-->
+                <!--android:id="@+id/welcome_signUp"-->
+                <!--android:layout_width="200dp"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_gravity="center"-->
+                <!--android:layout_marginTop="20dp"-->
+                <!--android:background="@drawable/my_add_button"-->
+                <!--android:text="عضویت در سامانه"-->
+                <!--android:textColor="@android:color/white" />-->
         </LinearLayout>
 
     </FrameLayout>

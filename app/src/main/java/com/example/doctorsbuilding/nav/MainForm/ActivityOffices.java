@@ -76,7 +76,7 @@ public class ActivityOffices extends AppCompatActivity {
     BadgeView badge;
     FloatingActionButton addButton;
     Button btn_signIn;
-    Button btn_signUp;
+    //    Button btn_signUp;
     RelativeLayout unreadMessageLayout;
     FrameLayout welcomePage;
     DrawerLayout mDrawer;
@@ -101,8 +101,10 @@ public class ActivityOffices extends AppCompatActivity {
     private ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
     private static final int MY_OFFICE = 0;
     private static final int MY_DOCTOR = 1;
-    private static final int LOGIN_REQUEST = 1;
-    private static final int SIGNUP_REQUEST = 2;
+    private static final int REQUEST_CODE = 1024;
+    private static final int LOGIN_RESPONSE_CODE = 0;
+    private static final int SIGNUP_RESPONSE_CODE = 1;
+    //    private static final int SIGNUP_REQUEST = 1025;
     boolean doubleBackToExitPressedOnce = false;
 
     @Override
@@ -132,8 +134,8 @@ public class ActivityOffices extends AppCompatActivity {
             task_unreadMessages = new AsyncCallGetUnreadMessagesWs();
             task_unreadMessages.execute();
             if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-                    setUserLayout(false);
-            }else if(G.UserInfo.getRole() == UserType.Assistant.ordinal()){
+                setUserLayout(false);
+            } else if (G.UserInfo.getRole() == UserType.Assistant.ordinal()) {
                 setAssistantLayout(false);
             }
         }
@@ -161,7 +163,7 @@ public class ActivityOffices extends AppCompatActivity {
         if (task_unreadMessages != null) {
             task_unreadMessages.cancel(true);
         }
-        if(task_getOfficeForAssistant != null)
+        if (task_getOfficeForAssistant != null)
             task_getOfficeForAssistant.cancel(true);
     }
 
@@ -178,7 +180,7 @@ public class ActivityOffices extends AppCompatActivity {
 
             else if (user == UserType.User)
                 setUserLayout(false);
-            else if(user == UserType.Assistant)
+            else if (user == UserType.Assistant)
                 setAssistantLayout(false);
 
         } else {
@@ -197,7 +199,7 @@ public class ActivityOffices extends AppCompatActivity {
         database = new DatabaseAdapter(ActivityOffices.this);
         welcomePage = (FrameLayout) findViewById(R.id.welcome_page);
         btn_signIn = (Button) findViewById(R.id.welcome_signIn);
-        btn_signUp = (Button) findViewById(R.id.welcome_signUp);
+//        btn_signUp = (Button) findViewById(R.id.welcome_signUp);
         mViewFlipper = (ViewFlipper) findViewById(R.id.offices_viewFlipper);
         officesListView = (ListView) findViewById(R.id.offices_lv_my_office);
         doctorsListView = (ListView) findViewById(R.id.offices_lv_my_doctor);
@@ -265,9 +267,6 @@ public class ActivityOffices extends AppCompatActivity {
                     case R.id.nav1_signIn:
                         btn_signIn.performClick();
                         break;
-                    case R.id.nav1_signUp:
-                        btn_signUp.performClick();
-                        break;
                     case R.id.nav1_news:
                         startActivity(new Intent(ActivityOffices.this, UserNewsActivity.class));
                         break;
@@ -290,8 +289,8 @@ public class ActivityOffices extends AppCompatActivity {
                         startActivity(new Intent(ActivityOffices.this, UserInboxActivity.class));
                         break;
                     case R.id.nav1_etebar:
-                                               startActivity(new Intent(ActivityOffices.this, ActivityEtebar.class));
-                                                break;
+                        startActivity(new Intent(ActivityOffices.this, ActivityEtebar.class));
+                        break;
                 }
                 mDrawer.closeDrawers();
             }
@@ -301,13 +300,7 @@ public class ActivityOffices extends AppCompatActivity {
         btn_signIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivityForResult(new Intent(ActivityOffices.this, SignInActivity.class), LOGIN_REQUEST);
-            }
-        });
-        btn_signUp.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivityForResult(new Intent(ActivityOffices.this, UserProfileActivity.class), SIGNUP_REQUEST);
+                startActivityForResult(new Intent(ActivityOffices.this, SignInActivity.class), REQUEST_CODE);
             }
         });
         unreadMessageLayout.setOnClickListener(new View.OnClickListener() {
@@ -329,7 +322,6 @@ public class ActivityOffices extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.activity_public_main_drawer, menu);
         if (user == UserType.Guest) {
             menuItems.add(menu.findItem(R.id.nav1_signIn));
-            menuItems.add(menu.findItem(R.id.nav1_signUp));
 //            menuItems.add(menu.findItem(R.id.nav1_intro));
             menuItems.add(menu.findItem(R.id.nav1_about));
         } else if (user == UserType.User || user == UserType.Assistant) {
@@ -386,8 +378,8 @@ public class ActivityOffices extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == LOGIN_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
+        if (requestCode == REQUEST_CODE) {
+            if (resultCode == LOGIN_RESPONSE_CODE) {
                 readSharedPrefrence();
                 menuItems.clear();
                 adapter_nav.removeAll();
@@ -399,23 +391,14 @@ public class ActivityOffices extends AppCompatActivity {
 
                     setUserLayout(true);
 
-                }else if(G.UserInfo.getRole() == UserType.Assistant.ordinal()){
+                } else if (G.UserInfo.getRole() == UserType.Assistant.ordinal()) {
                     setAssistantLayout(true);
                 }
 
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
-        }
-        if (requestCode == SIGNUP_REQUEST) {
-            if (resultCode == Activity.RESULT_OK) {
+            } else if (resultCode == SIGNUP_RESPONSE_CODE) {
                 menuItems.clear();
                 adapter_nav.removeAll();
 //                startActivity(new Intent(ActivityOffices.this, ActivityAllDoctors.class));
-            }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
             }
         }
     }

@@ -272,11 +272,11 @@ public class ActivityAssistant extends AppCompatActivity {
     private boolean checkFieldPage1() {
 
         if (username.getText().toString().trim().isEmpty()) {
-            new MessageBox(ActivityAssistant.this, "لطفا کد ملی را وارد نمایید .").show();
+            new MessageBox(ActivityAssistant.this, "لطفا شماره تلفن همراه را وارد نمایید.").show();
             return false;
         }
         if (!Util.IsValidCodeMeli(username.getText().toString().trim())) {
-            new MessageBox(ActivityAssistant.this, "کد ملی وارد شده نادرست می باشد .").show();
+            new MessageBox(ActivityAssistant.this, "شماره تلفن همراه وارد شده نادرست می باشد.").show();
             return false;
         }
         return true;
@@ -435,7 +435,7 @@ public class ActivityAssistant extends AppCompatActivity {
                         toolbar.setVisibility(View.GONE);
                         mViewFliper.setDisplayedChild(PAGE2);
                     } else {
-                        new MessageBox(ActivityAssistant.this, "کد ملی وارد شده مجاز نمی باشد .").show();
+                        new MessageBox(ActivityAssistant.this, "شماره تلفن همراه وارد شده مجاز نمی باشد.").show();
                     }
                 }
                 dialog.dismiss();

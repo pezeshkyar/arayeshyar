@@ -86,8 +86,10 @@ public class ActivityLoading extends AppCompatActivity {
     private void loadUser() {
 
         settings = G.getSharedPreferences();
-        G.UserInfo.setUserName(settings.getString("user", ""));
-        G.UserInfo.setPassword(settings.getString("pass", ""));
+        String username = settings.getString("user", "");
+        String password = settings.getString("pass", "");
+        G.UserInfo.setUserName(username);
+        G.UserInfo.setPassword(password);
 
     }
 

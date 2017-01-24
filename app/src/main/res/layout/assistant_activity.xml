@@ -29,7 +29,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/my_edit_text"
                 android:digits="0123456789"
-                android:hint="کد ملی"
+                android:hint="شماره تلفن همراه"
                 android:inputType="number|textNoSuggestions"
                 android:maxLength="10"
                 android:padding="8dp" />

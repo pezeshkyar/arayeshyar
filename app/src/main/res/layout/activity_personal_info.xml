@@ -175,7 +175,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:background="@drawable/my_edit_text"
-                android:hint="ایمیل(اختیاری)"
+                android:hint="ایمیل"
                 android:inputType="textEmailAddress|textNoSuggestions"
                 android:maxLength="100"
                 android:maxLines="1"

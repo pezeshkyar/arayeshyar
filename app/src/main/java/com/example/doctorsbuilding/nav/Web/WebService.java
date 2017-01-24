@@ -152,13 +152,13 @@ public class WebService {
 
         request.addProperty(Util.getStringWS(R.string.ws_name), user.getFirstName());
         request.addProperty(Util.getStringWS(R.string.ws_lastname), user.getLastName());
-        request.addProperty(Util.getStringWS(R.string.ws_mobileno), user.getPhone());
+//        request.addProperty(Util.getStringWS(R.string.ws_mobileno), user.getPhone());
         request.addProperty(Util.getStringWS(R.string.ws_username), user.getUserName());
-        request.addProperty(Util.getStringWS(R.string.ws_password), user.getPassword());
+//        request.addProperty(Util.getStringWS(R.string.ws_password), user.getPassword());
         request.addProperty(Util.getStringWS(R.string.ws_cityid), user.getCityID());
         byte[] picbytes = getBytes(user.getImgProfile());
         request.addProperty(Util.getStringWS(R.string.ws_pic), Base64.encodeToString(picbytes, Base64.DEFAULT));
-        request.addProperty(Util.getStringWS(R.string.ws_email), user.getEmail());
+//        request.addProperty(Util.getStringWS(R.string.ws_email), user.getEmail());
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
@@ -3286,7 +3286,7 @@ public class WebService {
         if (!G.isOnline()) {
             throw new PException(isOnlineMessage);
         }
-        String webMethName = Util.getStringWS(R.string.ws_verifySecurityCode);
+        String webMethName = Util.getStringWS(R.string.ws_verifyActivationCode);
         String result = null;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
@@ -3736,5 +3736,32 @@ public class WebService {
         }
 
         return patientInfos;
+    }
+    public static String sendActivationCodeWS(String username, String password) throws PException {
+        if (!G.isOnline()) {
+            throw new PException(isOnlineMessage);
+        }
+        String result = null;
+        String webMethName = Util.getStringWS(R.string.ws_sendActivationCode);
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
+            result = response.toString();
+        } catch (ConnectException ex) {
+            throw new PException(connectMessage);
+        } catch (Exception ex) {
+            throw new PException(otherMessage);
+        }
+
+        return result;
     }
 }

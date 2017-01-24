@@ -26,7 +26,7 @@
     <string name="drFirstName">نام</string>
     <string name="drLastName">نام خانوادگی</string>
     <string name="drMobile">موبایل</string>
-    <string name="drUserName">کد ملی</string>
+    <string name="drUserName">شماره تلفن همراه</string>
     <string name="drPassword">رمز عبور</string>
     <string name="drConfirmPassword">تکرار رمز عبور</string>
     <string name="drCity">شهر</string>
@@ -80,7 +80,7 @@
 
     <string name="google_play_map">AIzaSyDPxvHFihvS4p2yPFoH53zZ6X8Ex0CZIww</string>
 
-    <string name="ws_url">http://arayeshyar.com:8080/arayeshyar_new_user/services/Webservices?wsdl</string>
+    <string name="ws_url">http://arayeshyar.com:8080/arayeshyar_new_user1/services/Webservices?wsdl</string>
     <string name="ws_package">http://docTurn/</string>
     <string name="ws_getProvince">getProvince</string>
     <string name="ws_id">id</string>
@@ -317,4 +317,7 @@
     <string name="ws_getReserveUserForBarberToday">getReserveUserForBarberToday</string>
     <string name="ws_getReserveUserForBarber">getReserveUserForBarber</string>
     <string name="ws_getOfficeForBarber">getOfficeForBarber</string>
+    <string name="login_txt1">لطفا جهت ثبت نام یا ورود شماره تلفن همراه خود را وارد نمایید .</string>
+    <string name="ws_sendActivationCode">sendActivationCode</string>
+    <string name="ws_verifyActivationCode">verifyActivationCode</string>
 </resources>

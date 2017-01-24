@@ -150,11 +150,11 @@ public class ActivityManageSecretary extends AppCompatActivity {
 
     private boolean checkField_add() {
         if (txt_username.getText().toString().trim().equals("")) {
-            new MessageBox(ActivityManageSecretary.this, "لطفا نام کاربری منشی را وارد نمایید .").show();
+            new MessageBox(ActivityManageSecretary.this, "لطفا شماره تلفن همراه منشی را وارد نمایید.").show();
             return false;
         }
         if (!Util.IsValidCodeMeli(txt_username.getText().toString().trim())) {
-            new MessageBox(ActivityManageSecretary.this, "کد ملی وارد شده نادرست می باشد .").show();
+            new MessageBox(ActivityManageSecretary.this, "شماره تلفن همراه وارد شده نادرست می باشد.").show();
             return false;
         }
         return true;

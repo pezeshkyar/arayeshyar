@@ -25,6 +25,7 @@ import android.widget.ViewFlipper;
 import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
 import com.example.doctorsbuilding.nav.MainForm.ActivityOffices;
 import com.example.doctorsbuilding.nav.User.User;
+import com.example.doctorsbuilding.nav.User.UserProfileActivity;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.Hashing;
@@ -41,25 +42,20 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
  */
 public class SignInActivity extends AppCompatActivity {
     private ViewFlipper viewFlipper;
-    private Button forgetButton;
-    private Button btnGetPassword;
-    private Button backButton;
-    private Button btnSignIn;
+    private Button btnSendCode;
     private EditText txtUserName;
-    private EditText txtPassword;
-    private EditText txtmelicode;
     private SharedPreferences settings;
     private String password;
     private EditText txtSmsCode;
-    private Button btnSmsCode;
-    private EditText txtNewPwd;
-    private EditText txtReNewPwd;
-    private Button btnNewPwd;
+    private Button btnLogin;
     private Button btnResendSms;
     AsyncCallLoginWS loginWS;
-    AsyncForgetPasswordWS task_forgetPassword;
     AsyncVerifySecurityCodeWS verifySecurityCodeWS;
-    AsyncChangePWDWS changePWDWS;
+    SendActivationCodeWS sendActivationCodeWS;
+    private static final int PAGE1 = 0;
+    private static final int PAGE2 = 1;
+    private static final int REQUEST_CODE = 1024;
+    private static final int LOGIN_RESPONSE_CODE = 0;
 
 
     @Override
@@ -85,82 +81,46 @@ public class SignInActivity extends AppCompatActivity {
         super.onPause();
         if (loginWS != null)
             loginWS.cancel(true);
-
-        if (task_forgetPassword != null)
-            task_forgetPassword.cancel(true);
-
-        if (changePWDWS != null)
-            changePWDWS.cancel(true);
-
         if (verifySecurityCodeWS != null)
             verifySecurityCodeWS.cancel(true);
+        if (sendActivationCodeWS != null)
+            sendActivationCodeWS.cancel(true);
     }
 
     private void initViews() {
         viewFlipper = (ViewFlipper) findViewById(R.id.login_viewFlipper);
-        backButton = (Button) viewFlipper.findViewById(R.id.login_btnBack);
-        forgetButton = (Button) viewFlipper.findViewById(R.id.login_btn_forget);
-        btnGetPassword = (Button) viewFlipper.findViewById(R.id.login_btn_sms);
-        btnSignIn = (Button) viewFlipper.findViewById(R.id.login_btn_signIn);
+        btnSendCode = (Button) viewFlipper.findViewById(R.id.login_btn_sendCode);
         txtUserName = (EditText) viewFlipper.findViewById(R.id.login_userName);
         txtUserName.setRawInputType(Configuration.KEYBOARD_QWERTY);
-        txtPassword = (EditText) viewFlipper.findViewById(R.id.login_password);
-        txtmelicode = (EditText) viewFlipper.findViewById(R.id.login_melicode);
-        txtmelicode.setRawInputType(Configuration.KEYBOARD_QWERTY);
         txtSmsCode = (EditText) viewFlipper.findViewById(R.id.login_txt_smsCode);
         txtSmsCode.setRawInputType(Configuration.KEYBOARD_QWERTY);
-        btnSmsCode = (Button) viewFlipper.findViewById(R.id.login_btn_smsCode);
-        txtNewPwd = (EditText) viewFlipper.findViewById(R.id.login_txt_newPwd);
-        txtReNewPwd = (EditText) viewFlipper.findViewById(R.id.login_txt_reNewPwd);
-        btnNewPwd = (Button) viewFlipper.findViewById(R.id.login_btn_newPwd);
+        btnLogin = (Button) viewFlipper.findViewById(R.id.login_btn_login);
         btnResendSms = (Button) viewFlipper.findViewById(R.id.login_btn_resendSms);
 
     }
 
     private void eventListener() {
-        forgetButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!G.getSharedPreferences().getString("meli", "").isEmpty()){
-                    showNext();
-                    viewFlipper.setDisplayedChild(2);
-                }else {
-                    showNext();
-                    viewFlipper.setDisplayedChild(1);
-                }
-            }
-        });
+
         btnResendSms.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                G.getSharedPreferences().edit().remove("meli").apply();
+                G.getSharedPreferences().edit().remove("phone").apply();
                 showPrevious();
-                viewFlipper.setDisplayedChild(1);
+                viewFlipper.setDisplayedChild(PAGE1);
             }
         });
-        backButton.setOnClickListener(new View.OnClickListener() {
+
+        btnSendCode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                showPrevious();
-                viewFlipper.setDisplayedChild(0);
-            }
-        });
-        btnSignIn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                signIn();
-            }
-        });
-        btnGetPassword.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (checkFieldForgetPass()) {
-                    task_forgetPassword = new AsyncForgetPasswordWS();
-                    task_forgetPassword.execute();
+                if (checkFieldSendSecurityCode()) {
+                    sendActivationCodeWS = new SendActivationCodeWS();
+                    sendActivationCodeWS.execute();
                 }
             }
         });
-        btnSmsCode.setOnClickListener(new View.OnClickListener() {
+
+        btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (checkFieldVerifySecurityCode()) {
@@ -169,15 +129,7 @@ public class SignInActivity extends AppCompatActivity {
                 }
             }
         });
-        btnNewPwd.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (checkFieldChangePwd()) {
-                    changePWDWS = new AsyncChangePWDWS();
-                    changePWDWS.execute();
-                }
-            }
-        });
+
     }
 
     private void signIn() {
@@ -187,39 +139,6 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private boolean checkFieldForgetPass() {
-        if (txtmelicode.getText().toString().trim().equals("")) {
-            new MessageBox(SignInActivity.this, "لطفا کد ملی را وارد نمایید .").show();
-            return false;
-        }
-        if (!Util.IsValidCodeMeli(txtmelicode.getText().toString().trim())) {
-            new MessageBox(SignInActivity.this, "کد ملی وارد شده نادرست می باشد .").show();
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkFieldChangePwd() {
-        if (txtNewPwd.getText().toString().trim().isEmpty()) {
-            new MessageBox(SignInActivity.this, "لطفا پسورد خود را وارد نمایید .").show();
-            return false;
-        }
-        if (txtNewPwd.getText().toString().trim().length() < 4) {
-            new MessageBox(SignInActivity.this, "تعداد کاراکترهای پسورد نباید کمتر از 4 تا باشد .").show();
-            return false;
-        }
-        if (txtReNewPwd.getText().toString().trim().isEmpty()) {
-            new MessageBox(SignInActivity.this, "لطفا پسورد خود را دوباره وارد نمایید .").show();
-            return false;
-        }
-        if (!txtNewPwd.getText().toString().trim().equals(txtReNewPwd.getText().toString().trim())) {
-            new MessageBox(SignInActivity.this, "پسورد وارد شده با هم مطابقت ندارد .").show();
-            return false;
-        }
-        return true;
-    }
-
-
     private boolean checkFieldVerifySecurityCode() {
         if (txtSmsCode.getText().toString().trim().equals("")) {
             new MessageBox(SignInActivity.this, "لطفا رمزی که به تلفن همراه شما پیامک شده را وارد نمایید .").show();
@@ -228,13 +147,21 @@ public class SignInActivity extends AppCompatActivity {
         return true;
     }
 
-    private boolean checkField() {
+    private boolean checkFieldSendSecurityCode() {
         if (txtUserName.getText().toString().trim().equals("")) {
-            new MessageBox(SignInActivity.this, "لطفا کد ملی را وارد نمایید .").show();
+            new MessageBox(SignInActivity.this, "لطفا شماره تلفن همراه خود را وارد نمایید .").show();
             return false;
         }
-        if (txtPassword.getText().toString().trim().equals("")) {
-            new MessageBox(SignInActivity.this, "لطفا کلمه عبور را وارد نمایید .").show();
+        if (txtUserName.getText().toString().trim().length() != 11) {
+            new MessageBox(SignInActivity.this, "شماره تلفن همراه وارد شده نادرست می باشد .").show();
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkField() {
+        if (txtUserName.getText().toString().trim().equals("")) {
+            new MessageBox(SignInActivity.this, "لطفا شماره تلفن همراه را وارد نمایید.").show();
             return false;
         }
         return true;
@@ -267,7 +194,7 @@ public class SignInActivity extends AppCompatActivity {
             dialog = ProgressDialog.show(SignInActivity.this, "", "لطفا شکیبا باشید ...");
             dialog.getWindow().setGravity(Gravity.END);
             username = txtUserName.getText().toString().trim();
-            password = txtPassword.getText().toString().trim();
+            password = txtSmsCode.getText().toString().trim();
             try {
                 password = Hashing.SHA1(password);
             } catch (NoSuchAlgorithmException e) {
@@ -307,7 +234,7 @@ public class SignInActivity extends AppCompatActivity {
                     intent.putExtra("menu", userType);
                     switch (userType) {
                         case None:
-                            new MessageBox(SignInActivity.this, "کد ملی یا کلمه عبور اشتباه می باشد .").show();
+                            new MessageBox(SignInActivity.this, "شماره تلفن همراه یا کلمه عبور نادرست می باشد.").show();
                             break;
                         case User:
                             UserType.User.attachTo(intent);
@@ -337,7 +264,7 @@ public class SignInActivity extends AppCompatActivity {
                     } else {
                         G.UserInfo.setImgProfile(BitmapFactory.decodeResource(getResources(), R.drawable.doctor));
                     }
-                    setResult(Activity.RESULT_OK);
+                    setResult(LOGIN_RESPONSE_CODE);
                     finish();
                 }
             }
@@ -345,8 +272,6 @@ public class SignInActivity extends AppCompatActivity {
 
         private void save(int role) {
             SharedPreferences.Editor editor = settings.edit();
-            editor.putString("user", txtUserName.getText().toString());
-            editor.putString("pass", password);
             editor.putInt("role", role);
             editor.apply();
             try {
@@ -357,26 +282,34 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private class AsyncForgetPasswordWS extends AsyncTask<String, Void, Void> {
+    private class SendActivationCodeWS extends AsyncTask<String, Void, Void> {
         private String result = null;
         String msg = null;
         ProgressDialog dialog;
-        String _codeMeli;
+        String phoneNumber;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            _codeMeli = txtmelicode.getText().toString().trim();
             dialog = ProgressDialog.show(SignInActivity.this, "", "لطفا شکیبا باشید ...");
             dialog.getWindow().setGravity(Gravity.END);
             dialog.setCancelable(true);
-            btnGetPassword.setClickable(false);
+            btnSendCode.setClickable(false);
+            phoneNumber = txtUserName.getText().toString().trim();
+            try {
+                password = Hashing.SHA1(Util.getStringWS(R.string.updateCode));
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+
         }
 
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.ForegetPasswordWS(_codeMeli);
+                result = WebService.sendActivationCodeWS(phoneNumber, password);
             } catch (PException ex) {
                 msg = ex.getMessage();
             }
@@ -386,23 +319,22 @@ public class SignInActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (msg != null) {
-                btnGetPassword.setClickable(true);
+                btnSendCode.setClickable(true);
                 dialog.dismiss();
                 new MessageBox(SignInActivity.this, msg).show();
             } else {
                 dialog.dismiss();
-                btnGetPassword.setClickable(true);
+                btnSendCode.setClickable(true);
                 if (result != null) {
                     if (result.toUpperCase().equals("OK")) {
                         Toast.makeText(SignInActivity.this, Util.getStringWS(R.string.siginACT_forget_msg), Toast.LENGTH_LONG).show();
-                        //save melicode
+                        //save phoneNumber
                         SharedPreferences.Editor editor = settings.edit();
-                        editor.putString("meli", _codeMeli);
+                        editor.putString("phone", phoneNumber);
                         editor.apply();
-
                         //show next layout
                         showNext();
-                        viewFlipper.setDisplayedChild(2);
+                        viewFlipper.setDisplayedChild(PAGE2);
 
                     } else {
                         new MessageBox(SignInActivity.this, result).show();
@@ -418,15 +350,14 @@ public class SignInActivity extends AppCompatActivity {
         private String result = null;
         String msg = null;
         ProgressDialog dialog;
-        private String secutyCode;
-        private String _meliCode;
+        private String phoneNumber;
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            _meliCode = G.getSharedPreferences().getString("meli", "");
+            phoneNumber = G.getSharedPreferences().getString("phone", "");
             try {
-                secutyCode = Hashing.SHA1(txtSmsCode.getText().toString().trim());
+                password = Hashing.SHA1(txtSmsCode.getText().toString().trim());
             } catch (NoSuchAlgorithmException e) {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
@@ -435,13 +366,13 @@ public class SignInActivity extends AppCompatActivity {
             dialog = ProgressDialog.show(SignInActivity.this, "", "لطفا شکیبا باشید ...");
             dialog.getWindow().setGravity(Gravity.END);
             dialog.setCancelable(true);
-            btnSmsCode.setClickable(false);
+            btnLogin.setClickable(false);
         }
 
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.verifySecurityCodeWS(_meliCode, secutyCode);
+                result = WebService.verifySecurityCodeWS(phoneNumber, password);
             } catch (PException ex) {
                 msg = ex.getMessage();
             }
@@ -451,16 +382,28 @@ public class SignInActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             if (msg != null) {
-                btnSmsCode.setClickable(true);
+                btnLogin.setClickable(true);
                 dialog.dismiss();
                 new MessageBox(SignInActivity.this, msg).show();
             } else {
                 dialog.dismiss();
-                btnSmsCode.setClickable(true);
+                btnLogin.setClickable(true);
                 if (result != null) {
-                    if (result.toUpperCase().equals("OK")) {
-                        showNext();
-                        viewFlipper.setDisplayedChild(3);
+                    if (result.toLowerCase().equals("signin")) {
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString("user", phoneNumber);
+                        editor.putString("pass", password);
+                        editor.apply();
+                        G.getSharedPreferences().edit().remove("phone").apply();
+                        signIn();
+
+                    } else if (result.toLowerCase().equals("signup")) {
+                        SharedPreferences.Editor editor = settings.edit();
+                        editor.putString("user", phoneNumber);
+                        editor.putString("pass", password);
+                        editor.apply();
+                        G.getSharedPreferences().edit().remove("phone").apply();
+                        startActivityForResult(new Intent(SignInActivity.this, UserProfileActivity.class), REQUEST_CODE);
                     } else {
                         new MessageBox(SignInActivity.this, result).show();
                     }
@@ -471,62 +414,12 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
-    private class AsyncChangePWDWS extends AsyncTask<String, Void, Void> {
-        private String result = null;
-        String msg = null;
-        ProgressDialog dialog;
-        private String newPwd;
-        private String _meliCode;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            _meliCode = G.getSharedPreferences().getString("meli", "");
-            try {
-                newPwd = Hashing.SHA1(txtNewPwd.getText().toString().trim());
-            } catch (NoSuchAlgorithmException e) {
-                e.printStackTrace();
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-            dialog = ProgressDialog.show(SignInActivity.this, "", "لطفا شکیبا باشید ...");
-            dialog.getWindow().setGravity(Gravity.END);
-            dialog.setCancelable(true);
-            btnNewPwd.setClickable(false);
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                result = WebService.changePasswordWS(_meliCode, newPwd);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (msg != null) {
-                btnNewPwd.setClickable(true);
-                dialog.dismiss();
-                new MessageBox(SignInActivity.this, msg).show();
-            } else {
-                dialog.dismiss();
-                btnNewPwd.setClickable(true);
-                if (result != null) {
-                    if (result.toUpperCase().equals("OK")) {
-                        txtUserName.setText(G.getSharedPreferences().getString("meli", ""));
-                        txtPassword.setText(txtNewPwd.getText().toString().trim());
-                        G.getSharedPreferences().edit().remove("meli").apply();
-                        btnSignIn.performClick();
-                    } else {
-                        new MessageBox(SignInActivity.this, result).show();
-                    }
-                } else {
-                    new MessageBox(SignInActivity.this, "درخواست شما با مشکل مواجه شده است .").show();
-                }
-            }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_CODE){
+            setResult(resultCode);
+            finish();
         }
     }
 }
