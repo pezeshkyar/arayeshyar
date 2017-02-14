@@ -6,6 +6,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -74,6 +76,8 @@ public class CustomNavListView extends BaseAdapter {
         }
         holder.icon.setImageDrawable(items.get(position).getIcon());
         holder.text.setText(items.get(position).getTitle());
+        Animation animation = AnimationUtils.loadAnimation(context, R.anim.slide_in_from_right);
+        rowView.startAnimation(animation);
         return rowView;
     }
 }

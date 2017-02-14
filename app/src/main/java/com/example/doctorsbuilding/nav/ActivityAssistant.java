@@ -11,7 +11,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -21,10 +20,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
 import com.example.doctorsbuilding.nav.Util.CustomTimePickerDialog;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.Util;
@@ -76,7 +73,7 @@ public class ActivityAssistant extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityAssistant.this);
+        Util.setStatusBarColor(ActivityAssistant.this);
         setContentView(R.layout.assistant_activity);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         initViews();
@@ -275,7 +272,7 @@ public class ActivityAssistant extends AppCompatActivity {
             new MessageBox(ActivityAssistant.this, "لطفا شماره تلفن همراه را وارد نمایید.").show();
             return false;
         }
-        if (!Util.IsValidCodeMeli(username.getText().toString().trim())) {
+        if (username.getText().toString().trim().length() != 11) {
             new MessageBox(ActivityAssistant.this, "شماره تلفن همراه وارد شده نادرست می باشد.").show();
             return false;
         }
@@ -334,8 +331,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                taskGroups = WebService.invokeGetTaskGroupsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                taskGroups = WebService.invokeGetAllTaskGroupsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -372,8 +369,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                assistants = WebService.getAssistantOfficeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                assistants = WebService.getAssistantOfficeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -415,8 +412,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                assistant = WebService.setAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, assistantUsername, taskGroupId);
-            } catch (PException ex) {
+                assistant = WebService.setAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), assistantUsername, taskGroupId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -475,8 +472,8 @@ public class ActivityAssistant extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 timingIds = WebService.setAssistantTimeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, assistantUsername, taskGroupId, dayOfWeek, timing.getHour(), timing.getMinute(), timing.getDuration());
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), assistantUsername, taskGroupId, dayOfWeek, timing.getHour(), timing.getMinute(), timing.getDuration());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -530,8 +527,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.deleteAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, assistanId);
-            } catch (PException ex) {
+                result = WebService.deleteAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), assistanId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -577,8 +574,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.removeAssistantTimeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, timingId);
-            } catch (PException ex) {
+                result = WebService.removeAssistantTimeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), timingId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -624,8 +621,8 @@ public class ActivityAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                timings = WebService.getAssistantTimeListWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, assistantId);
-            } catch (PException ex) {
+                timings = WebService.getAssistantTimeListWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), assistantId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

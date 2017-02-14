@@ -9,18 +9,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Util.MessageBox;
-import com.example.doctorsbuilding.nav.Util.NonScrollListView;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -38,7 +36,7 @@ public class ActivityPatientListToday extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityPatientListToday.this);
+        Util.setStatusBarColor(ActivityPatientListToday.this);
         setContentView(R.layout.activity_patient_list_today);
         adapter = new CustomPatientListTodayListAdapter(ActivityPatientListToday.this);
         pageTitle = (TextView)findViewById(R.id.toolbar_title);
@@ -84,8 +82,8 @@ public class ActivityPatientListToday extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                patientInfos = WebService.invokeGetTodayPatientWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                patientInfos = WebService.invokeGetTodayPatientWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(),G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

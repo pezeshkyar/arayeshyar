@@ -3,6 +3,7 @@ package com.example.doctorsbuilding.nav.Dr.Profile;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -23,17 +24,23 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.ActivityImageShow;
 import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
+import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.Dr.Nobat.DrNobatFragment;
 import com.example.doctorsbuilding.nav.Dr.Notification.NotificationFragment;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
+import com.example.doctorsbuilding.nav.MyObservable;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Reservation;
-import com.example.doctorsbuilding.nav.UserType;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import de.hdodenhof.circleimageview.CircleImageView;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class DrProfileActivity extends AppCompatActivity {
@@ -42,25 +49,23 @@ public class DrProfileActivity extends AppCompatActivity {
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ImageButton backBtn;
     private ViewPager mViewPager;
-    //    private ImageButton btnGallery;
     private CircleImageView profileImage;
     private DatabaseAdapter database;
-    //    private AsyncGetDoctorPic getDoctorPic;
     TabLayout tabLayout;
     final static int DR_PIC_ID = 1;
-    private asyncCallReserveForGuestWS reserveForGuestWS;
-    private asyncCallReserveForMeWS reserveForMeWS;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(DrProfileActivity.this);
+        Util.setStatusBarColor(DrProfileActivity.this);
         setContentView(R.layout.activity_dr_profile);
         database = new DatabaseAdapter(DrProfileActivity.this);
 
         initViews();
         eventListeners();
+//        getDoctorPhoto();
         profileImage.setImageBitmap(G.officeInfo.getPhoto());
     }
 
@@ -74,24 +79,28 @@ public class DrProfileActivity extends AppCompatActivity {
         backBtn = (ImageButton) findViewById(R.id.dr_profile_backBtn);
         profileImage = (CircleImageView) findViewById(R.id.drProfile_btnDrPhoto);
 
-        if (G.doctorImageProfile == null) {
+        if (G.officeInfo.getPhoto() == null) {
 
             int id = R.drawable.doctor;
-            if (database.openConnection()) {
-                G.doctorImageProfile = database.getImageProfile(DR_PIC_ID);
+            try {
+                if (database.openConnection()) {
+                    G.officeInfo.setPhoto(database.getImageProfile(DR_PIC_ID));
+                }
+            } catch (MyException e) {
+                new MessageBox(DrProfileActivity.this, e.getMessage()).show();
             }
-            if (G.doctorImageProfile == null) {
-                G.doctorImageProfile = BitmapFactory.decodeResource(getBaseContext().getResources(), id);
+            if (G.officeInfo.getPhoto() == null) {
+                G.officeInfo.setPhoto(BitmapFactory.decodeResource(getBaseContext().getResources(), id));
             }
 
 
         }
-        profileImage.setImageBitmap(G.doctorImageProfile);
+        profileImage.setImageBitmap(G.officeInfo.getPhoto());
 
         TextView drName = (TextView) findViewById(R.id.tv_doctorName);
         TextView drExpert = (TextView) findViewById(R.id.tv_doctorInfo);
-        drName.setTypeface(G.getBoldFont());
-        drExpert.setTypeface(G.getBoldFont());
+        drName.setTypeface(Util.getBoldFont());
+        drExpert.setTypeface(Util.getBoldFont());
         drName.setText(G.officeInfo.getFirstname() + " " + G.officeInfo.getLastname());
         drExpert.setText(G.officeInfo.getSubExpertName());
 
@@ -121,7 +130,7 @@ public class DrProfileActivity extends AppCompatActivity {
             for (int i = 0; i < tabChildsCount; i++) {
                 View tabViewChild = vgTab.getChildAt(i);
                 if (tabViewChild instanceof TextView) {
-                    ((TextView) tabViewChild).setTypeface(G.getNormalFont());
+                    ((TextView) tabViewChild).setTypeface(Util.getNormalFont());
                 }
             }
         }
@@ -187,119 +196,31 @@ public class DrProfileActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        if (G.reservationInfo != null) {
-//            if (G.reservationInfo.getOwner() == UserType.User) {
-//                reserveForMeWS = new asyncCallReserveForMeWS();
-//                reserveForMeWS.execute();
-//            } else if (G.reservationInfo.getOwner() == UserType.Guest) {
-//                reserveForGuestWS = new asyncCallReserveForGuestWS();
-//                reserveForGuestWS.execute();
-//            }
-//        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (reserveForGuestWS != null)
-            reserveForGuestWS.cancel(true);
-        if (reserveForMeWS != null)
-            reserveForMeWS.cancel(true);
-    }
-
-    private class asyncCallReserveForMeWS extends AsyncTask<String, Void, Void> {
-
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(DrProfileActivity.this, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = G.reservationInfo;
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                result = WebService.invokeReserveForMeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.resNum);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(DrProfileActivity.this, msg).show();
-            } else {
-                if (result > 0) {
-//                    resevationId = result;
-                    dialog.dismiss();
-                    Toast.makeText(DrProfileActivity.this, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                } else {
-                    dialog.dismiss();
-                    new MessageBox(DrProfileActivity.this, "ثبت نوبت با مشکل مواجه شد !").show();
-                }
-            }
-        }
-    }
-
-    private class asyncCallReserveForGuestWS extends AsyncTask<String, Void, Void> {
-
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(DrProfileActivity.this, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = G.reservationInfo;
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            reservation.setPatientFirstName(strings[0]);
-            reservation.setPatientLastName(strings[1]);
-            reservation.setPatientPhoneNo(strings[2]);
-            try {
-                result = WebService.invokeReserveForGuestWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.UserInfo.getCityID());
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(DrProfileActivity.this, msg).show();
-            } else {
-                if (result > 0) {
-//                    resevationId = result;
-                    dialog.dismiss();
-                    Toast.makeText(DrProfileActivity.this, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                } else {
-                    dialog.dismiss();
-                    new MessageBox(DrProfileActivity.this, "ثبت نوبت با مشکل مواجه شد !").show();
-                }
-            }
-        }
-    }
+//    private void getDoctorPhoto() {
+//        MyObservable.getDoctorPic(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId())
+//                .subscribeOn(Schedulers.newThread())
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe(new Observer<Bitmap>() {
+//                    @Override
+//                    public void onSubscribe(Disposable d) {
+//
+//                    }
+//
+//                    @Override
+//                    public void onNext(Bitmap photo) {
+//                        G.officeInfo.setPhoto(photo);
+//                        profileImage.setImageBitmap(photo);
+//                    }
+//
+//                    @Override
+//                    public void onError(Throwable e) {
+//                        new MessageBox(DrProfileActivity.this, e.getMessage()).show();
+//                    }
+//
+//                    @Override
+//                    public void onComplete() {
+//
+//                    }
+//                });
+//    }
 }

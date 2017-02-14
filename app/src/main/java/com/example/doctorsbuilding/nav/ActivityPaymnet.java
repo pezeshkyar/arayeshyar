@@ -1,16 +1,13 @@
 package com.example.doctorsbuilding.nav;
 
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.http.SslError;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.webkit.SslErrorHandler;
@@ -43,7 +40,7 @@ public class ActivityPaymnet extends AppCompatActivity implements MyWebChromeCli
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityPaymnet.this);
+        Util.setStatusBarColor(ActivityPaymnet.this);
 
         setContentView(R.layout.activity_payment);
         amount = getIntent().getIntExtra("amount", -1);
@@ -121,7 +118,7 @@ public class ActivityPaymnet extends AppCompatActivity implements MyWebChromeCli
             try {
                 if (amount != -1)
                     result = WebService.getRequestNumber(G.UserInfo.getUserName(), G.UserInfo.getPassword(), amount);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

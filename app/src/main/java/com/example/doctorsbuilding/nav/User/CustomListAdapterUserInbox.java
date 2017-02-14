@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.G;
 import com.example.doctorsbuilding.nav.MessageInfo;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Web.WebService;
@@ -108,9 +108,9 @@ public class CustomListAdapterUserInbox extends BaseAdapter {
         protected Void doInBackground(String... strings) {
             possition = Integer.parseInt(strings[1]);
             try {
-                result = WebService.invokeRemoveMessageWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId
+                result = WebService.invokeRemoveMessageWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId()
                         , Integer.parseInt(strings[0]));
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

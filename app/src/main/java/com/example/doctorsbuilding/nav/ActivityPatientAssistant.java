@@ -1,6 +1,5 @@
 package com.example.doctorsbuilding.nav;
 
-import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
@@ -19,10 +18,10 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Util.CustomDatePickerDialog;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -43,7 +42,7 @@ public class ActivityPatientAssistant extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityPatientAssistant.this);
+        Util.setStatusBarColor(ActivityPatientAssistant.this);
         setContentView(R.layout.patientlist_for_assistant);
         initViews();
         eventListener();
@@ -124,8 +123,8 @@ public class ActivityPatientAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                patientInfos = WebService.invokeGetPatientAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, date);
-            } catch (PException ex) {
+                patientInfos = WebService.invokeGetPatientAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), date);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -166,8 +165,8 @@ public class ActivityPatientAssistant extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                patientInfos = WebService.invokeGetTodayPatientAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                patientInfos = WebService.invokeGetTodayPatientAssistantWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

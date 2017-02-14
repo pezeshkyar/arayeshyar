@@ -9,19 +9,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.doctorsbuilding.nav.Dr.Nobat.DrNobatActivity;
 import com.example.doctorsbuilding.nav.G;
 import com.example.doctorsbuilding.nav.MessageInfo;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class UserInboxActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(UserInboxActivity.this);
+        Util.setStatusBarColor(UserInboxActivity.this);
         setContentView(R.layout.activity_user_inbox);
         listView = (ListView) findViewById(R.id.userInbox_listView);
         messageInfos = new ArrayList<MessageInfo>();
@@ -104,7 +103,7 @@ public class UserInboxActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 messageInfos = WebService.invokeGetAllMessagesWS(G.UserInfo.getUserName(), G.UserInfo.getPassword());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -144,7 +143,7 @@ public class UserInboxActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 WebService.invokeSetMessageRead2WS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), messageInfo.getId());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

@@ -9,7 +9,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 
@@ -114,8 +113,8 @@ public class FragmentPatientFileMoney extends Fragment {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                map = WebService.invokeGetPatientFileWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, strings[0]);
-            } catch (PException ex) {
+                map = WebService.invokeGetPatientFileWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), strings[0]);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

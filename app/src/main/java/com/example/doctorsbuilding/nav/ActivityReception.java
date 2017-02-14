@@ -11,8 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.view.menu.MenuBuilder;
 import android.support.v7.view.menu.MenuPopupHelper;
 import android.support.v7.widget.PopupMenu;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,10 +25,6 @@ import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.MoneyTextWatcher;
 import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -55,7 +49,7 @@ public class ActivityReception extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityReception.this);
+        Util.setStatusBarColor(ActivityReception.this);
         setContentView(R.layout.activity_reception);
         initViews();
         eventListener();
@@ -185,9 +179,9 @@ public class ActivityReception extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeReceptionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId,
+                result = WebService.invokeReceptionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(),G.officeInfo.getId(),
                         reservationId, payment, description);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

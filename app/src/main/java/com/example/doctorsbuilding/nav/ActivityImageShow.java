@@ -10,6 +10,8 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.example.doctorsbuilding.nav.Util.Util;
+
 /**
  * Created by hossein on 10/4/2016.
  */
@@ -19,10 +21,10 @@ public class ActivityImageShow extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityImageShow.this);
+        Util.setStatusBarColor(ActivityImageShow.this);
         setContentView(R.layout.activity_showimage_profile);
         imageView = (ImageView)findViewById(R.id.zoomImageProfile);
 
-        imageView.setImageBitmap(G.doctorImageProfile);
+        imageView.setImageBitmap(G.officeInfo.getPhoto());
     }
 }

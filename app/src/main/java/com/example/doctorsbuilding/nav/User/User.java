@@ -120,10 +120,14 @@ public class User {
         this.stateName = stateName;
     }
 
+    public String getFullName() {
+        return this.firstName.concat(" ").concat(this.lastName);
+    }
 
     @Override
     public String toString() {
-        return getFirstName().concat(" "+getLastName());
+        return getFirstName().concat(" " + getLastName());
     }
+
 
 }

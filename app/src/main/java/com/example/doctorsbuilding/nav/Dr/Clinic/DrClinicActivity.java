@@ -22,12 +22,13 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Expert;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.SubExpert;
 import com.example.doctorsbuilding.nav.User.City;
 import com.example.doctorsbuilding.nav.User.State;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -72,7 +73,7 @@ public class DrClinicActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(DrClinicActivity.this);
+        Util.setStatusBarColor(DrClinicActivity.this);
         setContentView(R.layout.activity_dr_clinic);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -245,7 +246,7 @@ public class DrClinicActivity extends AppCompatActivity {
                 } else {
                     cities = WebService.invokeGetCityNameWS(1);
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -304,7 +305,7 @@ public class DrClinicActivity extends AppCompatActivity {
                 } else if (isOfficeExist) {
                     cities = WebService.invokeGetCityNameWS(G.officeInfo.getStateId());
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -357,7 +358,7 @@ public class DrClinicActivity extends AppCompatActivity {
                 } else {
                     subExperts = WebService.invokeGetSubSpecWS(1);
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -412,13 +413,13 @@ public class DrClinicActivity extends AppCompatActivity {
             if (expertSelectedIndex != -1) {
                 try {
                     subExperts = WebService.invokeGetSubSpecWS(experts.get(expertSelectedIndex).getId());
-                } catch (PException ex) {
+                } catch (MyException ex) {
                     msg = ex.getMessage();
                 }
             } else if (isOfficeExist) {
                 try {
                     subExperts = WebService.invokeGetSubSpecWS(G.officeInfo.getExpertId());
-                } catch (PException ex) {
+                } catch (MyException ex) {
                     msg = ex.getMessage();
                 }
             }
@@ -489,7 +490,7 @@ public class DrClinicActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeUpdateOfficeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), office);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

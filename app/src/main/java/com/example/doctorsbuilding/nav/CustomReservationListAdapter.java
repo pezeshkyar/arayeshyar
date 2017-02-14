@@ -16,13 +16,12 @@ import java.util.ArrayList;
  */
 public class CustomReservationListAdapter extends BaseAdapter {
     private Context context;
-    private ArrayList<ArrayList<String>> users = new ArrayList<ArrayList<String>>();
-    private int turnId;
+    private ArrayList<User> users = new ArrayList<User>();
+    private OnItemClickListener onItemClickListener;
 
-    public CustomReservationListAdapter(Context context, ArrayList<ArrayList<String>> users, int turnId) {
+    public CustomReservationListAdapter(Context context, ArrayList<User> users) {
         this.context = context;
         this.users = users;
-        this.turnId = turnId;
     }
 
     class Holder {
@@ -47,9 +46,40 @@ public class CustomReservationListAdapter extends BaseAdapter {
         } else {
             holder = (Holder) rowView.getTag();
         }
-        holder.name.setText(users.get(position).get(0));
-        holder.mobile.setText(users.get(position).get(1));
+        holder.name.setText(users.get(position).getFullName());
+        holder.mobile.setText(users.get(position).getPhone());
+        rowView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onItemClickListener.onItemClick(position, LviActionType.select);
+            }
+        });
         return rowView;
+    }
+
+    public void add(User user) {
+        users.add(user);
+        notifyDataSetChanged();
+    }
+
+    public void addAll(ArrayList<User> users1) {
+        users.clear();
+        users.addAll(users1);
+        notifyDataSetChanged();
+    }
+
+    public void removeAll() {
+        users.clear();
+        notifyDataSetChanged();
+    }
+
+    public void remove(int position) {
+        users.remove(position);
+        notifyDataSetChanged();
+    }
+
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
     @Override

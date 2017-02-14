@@ -96,7 +96,7 @@
     <string name="ws_cityid">cityid</string>
     <string name="ws_pic">pic</string>
     <string name="ws_email">email</string>
-    <string name="ws_updateUserInfo3">updateUserInfo3</string>
+    <string name="ws_updateUserInfo">updateUserInfo</string>
     <string name="ws_newPassword">newPassword</string>
     <string name="ws_getRoleInAll">getRoleInAll</string>
     <string name="ws_getUserInfoWithoutPic">getUserInfoWithoutPic</string>
@@ -131,7 +131,7 @@
     <string name="ws_lastName">lastName</string>
     <string name="ws_getDoctorPic">getDoctorPic</string>
     <string name="ws_getUserPic">getUserPic</string>
-    <string name="ws_updateUserPic2">updateUserPic2</string>
+    <string name="ws_updateUserPic">updateUserPic</string>
     <string name="ws_updateOfficeLocation">updateOfficeLocation</string>
     <string name="ws_getSpec">getSpec</string>
     <string name="ws_getSubSpec">getSubSpec</string>
@@ -189,14 +189,14 @@
     <string name="ws_senderLastName">senderLastName</string>
     <string name="ws_time">time</string>
     <string name="ws_getAllUnreadMessages">getAllUnreadMessages</string>
-    <string name="ws_getAllMessages1">getAllMessages1</string>
-    <string name="ws_setMessageRead2">setMessageRead2</string>
+    <string name="ws_getAllMessages">getAllMessages</string>
+    <string name="ws_setMessageRead">setMessageRead</string>
     <string name="ws_messageId">messageId</string>
     <string name="ws_getReservationByUser">getReservationByUser</string>
     <string name="ws_doctorFirstName">doctorFirstName</string>
     <string name="ws_doctorSpec">doctorSpec</string>
     <string name="ws_doctorSubSpec">doctorSubSpec</string>
-    <string name="ws_removeMessage2">removeMessage2</string>
+    <string name="ws_removeMessage">removeMessage</string>
     <string name="ws_reception">reception</string>
     <string name="ws_description">description</string>
     <string name="ws_getTodayPatient">getTodayPatient</string>
@@ -218,7 +218,7 @@
     <string name="ws_updateTaskName">updateTaskName</string>
     <string name="ws_updateTaskPrice">updateTaskPrice</string>
     <string name="ws_deleteTask">deleteTask</string>
-    <string name="ws_addSecretaryToOffice2">addSecretaryToOffice2</string>
+    <string name="ws_addSecretaryToOffice">addSecretaryToOffice</string>
     <string name="ws_secretary">secretary</string>
     <string name="ws_removeSecretaryFromOffice">removeSecretaryFromOffice</string>
     <string name="ws_getSecretaryInfo">getSecretaryInfo</string>
@@ -276,7 +276,7 @@
     <string name="etebar_err">لطفا مبلغ درخواستی را وارد نمایید .</string>
     <string name="addturn_etebar_error">مبلغ اعتبار شما جهت پرداخت کافی نمی باشد .</string>
     <string name="factor_warn1">در صورت عدم دریافت کد رهگیری از سامانه لطفا از قسمت پشتبانی مشکل را با همکاران ما در میان بگذارید.</string>
-    <string name="factor_warn2">امکان لغو نوبت تنها یک روز مانده به نوبت شما فعال می باشد در صورت توجه نکردن به این موضوع عواقب آن مربوط به خود شخص می باشد.</string>
+    <string name="factor_warn2">امکان لغو نوبت تنها 24 ساعت مانده به نوبت شما امکان پذیر می باشد .</string>
     <string name="factor_txt1">نام و نام خانوادگی : </string>
     <string name="factor_txt2">نام آرایشگر : </string>
     <string name="factor_txt3">تاریخ مراجعه :</string>
@@ -320,4 +320,7 @@
     <string name="login_txt1">لطفا جهت ثبت نام یا ورود شماره تلفن همراه خود را وارد نمایید .</string>
     <string name="ws_sendActivationCode">sendActivationCode</string>
     <string name="ws_verifyActivationCode">verifyActivationCode</string>
+    <string name="ws_getUserInfo">getUserInfo</string>
+    <string name="ws_getOfficeForAll">getOfficeForAll</string>
+    <string name="ws_getAllTaskGroups">getAllTaskGroups</string>
 </resources>

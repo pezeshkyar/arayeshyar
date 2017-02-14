@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -15,21 +14,18 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.doctorsbuilding.nav.ActivityImageShow;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
-import java.util.EventListener;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -55,7 +51,7 @@ public class ActivityTickets extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityTickets.this);
+        Util.setStatusBarColor(ActivityTickets.this);
         setContentView(R.layout.activity_tickets);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -123,8 +119,8 @@ public class ActivityTickets extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                ticket_list = WebService.invokeGetTicketWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                ticket_list = WebService.invokeGetTicketWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

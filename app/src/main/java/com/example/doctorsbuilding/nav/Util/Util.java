@@ -1,6 +1,9 @@
 package com.example.doctorsbuilding.nav.Util;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.support.v4.content.ContextCompat;
 import android.view.WindowManager;
@@ -14,7 +17,7 @@ import java.text.DecimalFormatSymbols;
 /**
  * Created by hossein on 9/6/2016.
  */
-public class Util{
+public class Util {
     public static String getCurrency(int number) {
         final DecimalFormatSymbols symbols = new DecimalFormatSymbols();
         symbols.setGroupingSeparator(',');
@@ -79,7 +82,25 @@ public class Util{
     }
 
     public static String getStringWS(int id) {
-        return G.getContext().getString(id);
+        return G.context.getString(id);
+    }
+
+    public static SharedPreferences getSharedPreferences(Context context) {
+        return context.getSharedPreferences("arayeshyarDemo", 0);
+
+    }
+    public static Typeface getBoldFont() {
+        return Typeface.createFromAsset(G.context.getAssets(), "fonts/IRANSansMobile_Bold.ttf");
+    }
+    public static Typeface getNormalFont() {
+        return Typeface.createFromAsset(G.context.getAssets(), "fonts/IRANSansMobile(FaNum).ttf");
+    }
+
+    public static void setStatusBarColor(Activity activity){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            activity.getWindow().setStatusBarColor(ContextCompat.getColor(activity, R.color.statusBarColor));
+        }
     }
 
 }

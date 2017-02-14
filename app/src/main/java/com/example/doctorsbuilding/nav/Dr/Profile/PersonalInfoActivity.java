@@ -1,6 +1,7 @@
 package com.example.doctorsbuilding.nav.Dr.Profile;
 
 import android.app.Activity;
+import android.app.Application;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,7 +9,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -33,18 +33,19 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doctorsbuilding.nav.ActivityLoading;
 import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
+import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.User.City;
 import com.example.doctorsbuilding.nav.User.DialogSelectImage;
 import com.example.doctorsbuilding.nav.User.State;
 import com.example.doctorsbuilding.nav.User.User;
-import com.example.doctorsbuilding.nav.UserType;
 import com.example.doctorsbuilding.nav.Util.DbBitmapUtility;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
-import com.example.doctorsbuilding.nav.Util.RoundedImageView;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.Hashing;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
@@ -62,7 +63,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
     private EditText txtFirstName;
     private EditText txtLastName;
     private EditText txtMobile;
-    private EditText txtUserName;
+    private TextView txtUserName;
     private EditText txtPassword;
     private EditText txtRePassword;
     private EditText txtEmail;
@@ -96,7 +97,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(PersonalInfoActivity.this);
+        Util.setStatusBarColor(PersonalInfoActivity.this);
         setContentView(R.layout.activity_personal_info);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         initViews();
@@ -147,7 +148,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
 
     private void initViews() {
         popupMenu = new PopupMenu(PersonalInfoActivity.this, btn_setting);
-        popupMenu.inflate(R.menu.menu_action_bar);
+        popupMenu.inflate(R.menu.menu_popup_account);
         btn_setting = (ImageButton) findViewById(R.id.personalInfo_setting);
         txt_name = (TextView) findViewById(R.id.profile_name);
         backBtn = (ImageButton) findViewById(R.id.personalInfo_backBtn);
@@ -155,7 +156,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
         txtLastName = (EditText) findViewById(R.id.dr_LastName);
         txtMobile = (EditText) findViewById(R.id.dr_Mobile);
         txtMobile.setRawInputType(Configuration.KEYBOARD_QWERTY);
-        txtUserName = (EditText) findViewById(R.id.dr_UserName);
+        txtUserName = (TextView) findViewById(R.id.dr_UserName);
         txtUserName.setVisibility(View.GONE);
         txtPassword = (EditText) findViewById(R.id.dr_Password);
         txtPassword.setVisibility(View.GONE);
@@ -176,24 +177,23 @@ public class PersonalInfoActivity extends AppCompatActivity {
         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-                if (item.getItemId() == R.id.menu_change_pass) {
-                    final DialogChangePassword dialog = new DialogChangePassword(PersonalInfoActivity.this, android.R.style.Theme_DeviceDefault_Light_Dialog);
-                    dialog.show();
-                    dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialogInterface) {
-                            if (dialog.getResult()) {
-                                password = dialog.getPassword();
-                                try {
-                                    password = Hashing.SHA1(password);
-                                } catch (NoSuchAlgorithmException e) {
-                                } catch (UnsupportedEncodingException e) {
-                                }
-                                registerTask = new AsyncCallRegisterWS();
-                                registerTask.execute();
-                            }
+                if (item.getItemId() == R.id.menu_popup_logout) {
+                    Util.getSharedPreferences(PersonalInfoActivity.this).edit().remove("user").apply();
+                    Util.getSharedPreferences(PersonalInfoActivity.this).edit().remove("pass").apply();
+                    Util.getSharedPreferences(PersonalInfoActivity.this).edit().remove("role").apply();
+                    G.UserInfo = new User();
+                    G.officeInfo = new Office();
+                    try {
+                        if (database.openConnection()) {
+                            database.deleteAllOffice();
+                            database.deleteAllGalleryPic();
+                            database.closeConnection();
                         }
-                    });
+                    } catch (MyException e) {
+                        e.printStackTrace();
+                    }
+                    startActivity(new Intent(PersonalInfoActivity.this, ActivityLoading.class));
+                    finish();
                 }
                 return false;
             }
@@ -346,7 +346,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
                     stateID = G.UserInfo.getStateID();
                     cityList = WebService.invokeGetCityNameWS(stateID);
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -416,7 +416,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 cityList = WebService.invokeGetCityNameWS(stateID);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -479,7 +479,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeUpdateUserWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), setUserData());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -497,9 +497,6 @@ public class PersonalInfoActivity extends AppCompatActivity {
                 if (result.equals("OK")) {
                     Toast.makeText(PersonalInfoActivity.this, "ثبت مشخصات با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
                     G.UserInfo = user;
-                    SharedPreferences.Editor editor = G.getSharedPreferences().edit();
-                    editor.putString("pass", G.UserInfo.getPassword());
-                    editor.apply();
                     finish();
                 } else {
                     new MessageBox(PersonalInfoActivity.this, "خطایی در ثبت اطلاعات رخ داده است .").show();
@@ -548,7 +545,7 @@ public class PersonalInfoActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeUpdateUserPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), userPic);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -567,12 +564,13 @@ public class PersonalInfoActivity extends AppCompatActivity {
                 if (result) {
                     profileImage.setImageBitmap(userPic);
                     G.UserInfo.setImgProfile(userPic);
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal())
-                        G.doctorImageProfile = userPic;
-
-                    if (database.openConnection()) {
-                        database.saveImageProfile(imageProfileId, DbBitmapUtility.getBytes(userPic));
-                        database.closeConnection();
+                    try {
+                        if (database.openConnection()) {
+                            database.saveImageProfile(imageProfileId, DbBitmapUtility.getBytes(userPic));
+                            database.closeConnection();
+                        }
+                    } catch (MyException e) {
+                        new MessageBox(PersonalInfoActivity.this, e.getMessage()).show();
                     }
                 } else {
                     new MessageBox(PersonalInfoActivity.this, "تغییر عکس پروفایل با مشکل مواجه شده است .").show();

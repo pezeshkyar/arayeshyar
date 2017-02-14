@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorMainContent">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:background="@drawable/layout_shadow"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="8dp"
+            android:text="لطفا کد آرایشگاه خود را وارد نمایید" />
+
+        <EditText
+            android:id="@+id/add_new_office_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/my_edit_text"
+            android:digits="0123456789"
+            android:inputType="number|textNoSuggestions"
+            android:maxLength="4"
+            android:padding="8dp"
+            android:textColor="@android:color/black" />
+
+        <Button
+            android:id="@+id/add_new_office_btn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/my_button"
+            android:padding="8dp"
+            android:text="ثبت آرایشگاه"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+</ScrollView>

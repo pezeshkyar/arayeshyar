@@ -14,6 +14,7 @@ import android.widget.TextView;
 
 import com.example.doctorsbuilding.nav.G;
 import com.example.doctorsbuilding.nav.R;
+import com.example.doctorsbuilding.nav.Util.Util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,15 +58,15 @@ public class DiscussArrayAdapter extends ArrayAdapter<OneComment> {
 
 
         TextView sender = (TextView) row.findViewById(R.id.support_sender);
-        sender.setTypeface(G.getBoldFont());
+        sender.setTypeface(Util.getBoldFont());
         sender.setText(coment.sender);
 
         TextView comment = (TextView) row.findViewById(R.id.support_comment);
-        comment.setTypeface(G.getNormalFont());
+        comment.setTypeface(Util.getNormalFont());
         comment.setText(coment.comment);
 
         TextView date = (TextView) row.findViewById(R.id.support_date);
-        date.setTypeface(G.getNormalFont());
+        date.setTypeface(Util.getNormalFont());
         date.setText(coment.date);
 
 //        date.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);

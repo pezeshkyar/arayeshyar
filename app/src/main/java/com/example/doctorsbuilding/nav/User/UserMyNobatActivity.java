@@ -17,10 +17,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.ReservationByUser;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -47,7 +48,7 @@ public class UserMyNobatActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(UserMyNobatActivity.this);
+        Util.setStatusBarColor(UserMyNobatActivity.this);
         setContentView(R.layout.activity_my_nobat_user);
         initViews();
         turnTxtNothing.setVisibility(View.GONE);
@@ -112,8 +113,8 @@ public class UserMyNobatActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeGetReservayionByUserWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, count, index);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), count, index);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

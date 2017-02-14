@@ -2,16 +2,14 @@ package com.example.doctorsbuilding.nav;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Typeface;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+import android.os.Handler;
 import android.support.design.widget.NavigationView;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -19,16 +17,14 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.Toolbar;
-import android.text.Spannable;
-import android.text.SpannableString;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -44,17 +40,13 @@ import com.example.doctorsbuilding.nav.Dr.Nobat.DrNobatActivity;
 import com.example.doctorsbuilding.nav.Dr.Notification.ManagementNotificationActivity;
 import com.example.doctorsbuilding.nav.Dr.Profile.DrProfileActivity;
 import com.example.doctorsbuilding.nav.Dr.Profile.PersonalInfoActivity;
-import com.example.doctorsbuilding.nav.Question.ActivityCartex;
 import com.example.doctorsbuilding.nav.Question.ActivityCreateQuestion;
-import com.example.doctorsbuilding.nav.User.User;
 import com.example.doctorsbuilding.nav.User.UserInboxActivity;
 import com.example.doctorsbuilding.nav.User.UserMyNobatActivity;
 import com.example.doctorsbuilding.nav.User.UserNewsActivity;
-import com.example.doctorsbuilding.nav.User.UserProfileActivity;
 import com.example.doctorsbuilding.nav.Util.DbBitmapUtility;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
-import com.example.doctorsbuilding.nav.Util.RoundedImageView;
-import com.example.doctorsbuilding.nav.Web.WebService;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.support.ActivityTickets;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -67,57 +59,57 @@ import com.viewpagerindicator.CirclePageIndicator;
 
 import java.util.ArrayList;
 
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     NavigationView navigationView = null;
-    public UserType menu = UserType.None;
-    private GoogleMap mMap;
-    TextView pageTitle;
+    GoogleMap mMap;
+    BadgeView badge;
+    RelativeLayout unreadMessageLayout;
     TextView drName;
     TextView drExpert;
     TextView drAddress;
     TextView drPhone;
     TextView drBiography;
-    SupportMapFragment mapFragment;
-    ImageButton btnCall;
-    DatabaseAdapter database;
-    final static int IMAGE_PROFILE_ID_USER = 2;
-    CirclePageIndicator indicator;
-    static ViewPager mPager;
-    ArrayList<PhotoDesc> baners;
-    asyncGetGalleryPic asyncGetGalleryPic = null;
-    asyncGetImageIdFromWeb asyncBaner = null;
-    ArrayList<Boolean> banerTaskList;
-    ImageButton btn_menu;
-    DrawerLayout mDrawerLayout;
-    ImageView menu_header_image;
     TextView menu_header_name;
     TextView menu_header_version;
+    Button RightFloatButton;
+    Button LeftFloatButton;
+    ImageButton btn_menu;
+    SupportMapFragment mapFragment;
+    DatabaseAdapter database;
+    CirclePageIndicator indicator;
+    DrawerLayout mDrawerLayout;
+    ImageView menu_header_image;
     ProgressBar baner_progress;
     DrawerLayout drawer;
-    FloatingActionButton fab_getTurn;
-    private ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
-    private CustomNavListView adapter_nav;
-    private ListView nav_listview;
-    private FloatingActionButton btn_getReception;
-    private ImageButton btn_notice;
+    ArrayList<PhotoDesc> baners;
+    ArrayList<Boolean> banerTaskList;
+    ArrayList<MenuItem> menuItems;
+    ArrayList<MessageInfo> unreadMessages = null;
+    CustomNavListView adapter_nav;
+    ListView nav_listview;
+    UserType menu = UserType.None;
+    static ViewPager mPager;
+    final static int IMAGE_PROFILE_ID_USER = 2;
+    boolean doubleBackToExitPressedOnce = false;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(MainActivity.this);
+        Util.setStatusBarColor(MainActivity.this);
         setContentView(R.layout.activity_main);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
-
         initViews();
-
-        asyncBaner = new asyncGetImageIdFromWeb();
-        asyncBaner.execute();
-
+        eventListener();
+        getGalleryPicIds();
     }
 
     @Override
@@ -131,23 +123,230 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updatePage();
     }
 
-    private void stopAllAsyncTask() {
-        if (asyncGetGalleryPic != null)
-            asyncGetGalleryPic.cancel(true);
-        if (asyncBaner != null) {
-            asyncBaner.cancel(true);
+    private void initViews() {
+        RightFloatButton = (Button) findViewById(R.id.main_activity_floatbtn1);
+        LeftFloatButton = (Button) findViewById(R.id.main_activity_floatbtn2);
+        UserType usr = UserType.values()[G.officeInfo.getRole()];
+        switch (usr) {
+            case User:
+                RightFloatButton.setText("دریافت نوبت");
+                LeftFloatButton.setText("تماس تلفنی");
+                break;
+            case Assistant:
+                RightFloatButton.setText("لیست پذیرش");
+                LeftFloatButton.setText("تماس تلفنی");
+                break;
+            case Dr:
+            case secretary:
+                RightFloatButton.setText("لیست پذیرش");
+                LeftFloatButton.setText("اطلاع رسانی");
+                break;
         }
+
+        menuItems = new ArrayList<MenuItem>();
+        unreadMessageLayout = (RelativeLayout) findViewById(R.id.unreadMessage1);
+        badge = new BadgeView(MainActivity.this, unreadMessageLayout);
+        badge.setBadgePosition(BadgeView.POSITION_TOP_RIGHT);
+        badge.setBadgeBackgroundColor(ContextCompat.getColor(MainActivity.this, R.color.badgeColor));
+        database = new DatabaseAdapter(MainActivity.this);
+        adapter_nav = new CustomNavListView(MainActivity.this, new ArrayList<MenuItem>());
+        nav_listview = (ListView) findViewById(R.id.mainActivity_nav_lv);
+        nav_listview.setAdapter(adapter_nav);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
+        if (currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+            ViewCompat.setLayoutDirection(drawer, ViewCompat.LAYOUT_DIRECTION_RTL);
+        }
+        final Toolbar mainToolbar = (Toolbar) findViewById(R.id.toolbar33);
+        mainToolbar.setContentInsetsAbsolute(0, 0);
+        mPager = (ViewPager) findViewById(R.id.pager);
+        indicator = (CirclePageIndicator)
+                findViewById(R.id.indicator);
+        baner_progress = (ProgressBar) findViewById(R.id.baner_progress);
+        drName = (TextView) findViewById(R.id.content_main_name);
+        drExpert = (TextView) findViewById(R.id.content_main_expert);
+        drAddress = (TextView) findViewById(R.id.content_main_address);
+        drPhone = (TextView) findViewById(R.id.content_main_tel);
+        drBiography = (TextView) findViewById(R.id.content_main_biography);
+        btn_menu = (ImageButton) findViewById(R.id.menu_btn);
+
+        setNavigationDrawer();
+        mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        stopAllAsyncTask();
+    private void eventListener() {
+        UserType usr = UserType.values()[G.officeInfo.getRole()];
+        switch (usr) {
+            case User:
+                RightFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(MainActivity.this, DrProfileActivity.class));
+                    }
+                });
+                LeftFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_CALL);
+                        intent.setData(Uri.parse("tel:" + G.officeInfo.getPhone()));
+                        startActivity(intent);
+                    }
+                });
+                break;
+            case Assistant:
+                RightFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(MainActivity.this, ActivityPatientAssistant.class));
+                    }
+                });
+                LeftFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(Intent.ACTION_CALL);
+                        intent.setData(Uri.parse("tel:" + G.officeInfo.getPhone()));
+                        startActivity(intent);
+                    }
+                });
+                break;
+            case Dr:
+            case secretary:
+                RightFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(MainActivity.this, ActivityPatientListToday.class));
+                    }
+                });
+                LeftFloatButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        startActivity(new Intent(MainActivity.this, ManagementNotificationActivity.class));
+                    }
+                });
+
+                break;
+        }
+
+        btn_menu.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mDrawerLayout.openDrawer(Gravity.RIGHT);
+            }
+        });
+        nav_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+                switch (menuItems.get(position).getItemId()) {
+                    case R.id.nav2_clinic:
+                        startActivity(new Intent(MainActivity.this, DrClinicActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_addTurn:
+                        startActivity(new Intent(MainActivity.this, DrProfileActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_manage_nobat:
+                        startActivity(new Intent(MainActivity.this, DrNobatActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_gallery:
+                        startActivity(new Intent(MainActivity.this, gallery2.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_taskes:
+                        startActivity(new Intent(MainActivity.this, ActivityManagementTaskes.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_secretary:
+                        startActivity(new Intent(MainActivity.this, ActivityManageSecretary.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_map:
+                        startActivity(new Intent(MainActivity.this, MapActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_patientFile:
+                        startActivity(new Intent(MainActivity.this, ActivitySearchPatient.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_question:
+                        startActivity(new Intent(MainActivity.this, ActivityCreateQuestion.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_user_patientFile:
+                        Intent intent = new Intent(MainActivity.this, ActivityPatientFile.class);
+                        intent.putExtra("patientUserName", G.UserInfo.getUserName());
+                        startActivity(intent);
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_my_nobat:
+                        startActivity(new Intent(MainActivity.this, UserMyNobatActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_news:
+                        startActivity(new Intent(MainActivity.this, UserNewsActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_assistant:
+                        startActivity(new Intent(MainActivity.this, ActivityAssistant.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_myOffice:
+                        startActivity(new Intent(MainActivity.this, ActivityMyOffices.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_support:
+                        startActivity(new Intent(MainActivity.this, ActivityTickets.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_logout:
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_account:
+                        startActivity(new Intent(MainActivity.this, PersonalInfoActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_inbox:
+                        startActivity(new Intent(MainActivity.this, UserInboxActivity.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_etebar:
+                        startActivity(new Intent(MainActivity.this, ActivityEtebar.class));
+                        drawer.closeDrawer(Gravity.RIGHT);
+                        break;
+                    case R.id.nav2_setting:
+                        setNavigationSetttingItem(menu);
+                        break;
+                    case R.id.nav2_back:
+                        setNavigationItem(menu);
+                        break;
+
+                    default:
+                        break;
+                }
+            }
+        });
+
+        unreadMessageLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (unreadMessages != null && unreadMessages.size() != 0) {
+                    ActivityNotificationDialog dialog = new ActivityNotificationDialog(MainActivity.this, unreadMessages);
+                    dialog.show();
+                } else {
+                    Toast.makeText(MainActivity.this, "هیچ پیام جدیدی برای خواندن وجود ندارد .", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
     }
 
     private void updatePage() {
 
+        getUnreadMessage();
         database = new DatabaseAdapter(MainActivity.this);
         loadUser();
         if (G.officeInfo != null) {
@@ -156,20 +355,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             drAddress.setText(G.officeInfo.getAddress());
             drPhone.setText(G.officeInfo.getPhone());
             drBiography.setText(G.officeInfo.getBiography());
-            pageTitle.setText("".concat("").concat(G.officeInfo.getFirstname()).concat(" ").concat(G.officeInfo.getLastname()));
             mapFragment.getMapAsync(this);
         }
         if (G.UserInfo.getImgProfile() == null) {
             int id = R.drawable.doctor;
-            if (database.openConnection()) {
-                G.UserInfo.setImgProfile(database.getImageProfile(IMAGE_PROFILE_ID_USER));
+            try {
+                if (database.openConnection()) {
+                    G.UserInfo.setImgProfile(database.getImageProfile(IMAGE_PROFILE_ID_USER));
+                }
+            } catch (MyException e) {
+                new MessageBox(MainActivity.this, e.getMessage()).show();
             }
-            if (G.UserInfo.getImgProfile() == null)
-                G.UserInfo.setImgProfile(BitmapFactory.decodeResource(getBaseContext().getResources(), id));
+            G.UserInfo.setImgProfile(BitmapFactory.decodeResource(getBaseContext().getResources(), id));
         }
 
-        if (menuItems.size() == 0)
-            setNavigationViewMenu(menu);
+//        if (menuItems.size() == 0)
+        setNavigationViewMenu(menu);
     }
 
     private void initSlideShow(ArrayList<Integer> imageIdsInWeb) {
@@ -189,38 +390,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         indicator.setViewPager(mPager);
         final float density = getResources().getDisplayMetrics().density;
         indicator.setRadius(5 * density);
-
-//        NUM_PAGES = ImagesArray.size();
-//
-//        // Auto start of viewpager
-//        final Handler handler = new Handler();
-//        final Runnable Update = new Runnable() {
-//            public void run() {
-//                if (currentPage == NUM_PAGES) {
-//                    currentPage = 0;
-//                }
-//                mPager.setCurrentItem(currentPage++, true);
-//            }
-//        };
-//        swipeTimer = new Timer();
-//        swipeTimer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                handler.post(Update);
-//            }
-//        }, 3000, 3000);
-
         banerTaskList.set(0, true);
-        asyncGetGalleryPic = new asyncGetGalleryPic();
-        asyncGetGalleryPic.execute(String.valueOf(baners.get(0).getId()), String.valueOf(0));
+        getGalleryPicFromPhone(baners.get(0).getId(), 0);
         indicator.setOnPageChangeListener(new ViewPager.OnPageChangeListener() {
 
             @Override
             public void onPageSelected(int position) {
                 if (!banerTaskList.get(position)) {
                     banerTaskList.set(position, true);
-                    asyncGetGalleryPic = new asyncGetGalleryPic();
-                    asyncGetGalleryPic.execute(String.valueOf(baners.get(position).getId()), String.valueOf(position));
+                    getGalleryPicFromPhone(baners.get(position).getId(), position);
                 }
             }
 
@@ -237,162 +415,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void initViews() {
-        btnCall = (ImageButton) findViewById(R.id.btnCall);
-        btn_notice = (ImageButton)findViewById(R.id.btnNotice);
-        btn_getReception = (FloatingActionButton) findViewById(R.id.fab_getReception);
-        fab_getTurn = (FloatingActionButton) findViewById(R.id.fab_getTurn);
-        if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-            fab_getTurn.setVisibility(View.VISIBLE);
-            btnCall.setVisibility(View.VISIBLE);
-        }
-        else if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()){
-            btn_getReception.setVisibility(View.VISIBLE);
-            btn_notice.setVisibility(View.VISIBLE);
-        }
-
-
-        adapter_nav = new CustomNavListView(MainActivity.this, new ArrayList<MenuItem>());
-        nav_listview = (ListView) findViewById(R.id.mainActivity_nav_lv);
-        nav_listview.setAdapter(adapter_nav);
-        pageTitle = (TextView) findViewById(R.id.mainpage_title);
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        int currentapiVersion = android.os.Build.VERSION.SDK_INT;
-
-        if (currentapiVersion >= Build.VERSION_CODES.JELLY_BEAN) {
-            ViewCompat.setLayoutDirection(drawer, ViewCompat.LAYOUT_DIRECTION_RTL);
-        }
-
-
-        //final SlidingUpPanelLayout layout = (SlidingUpPanelLayout) findViewById(R.id.sliding_layout);
-
-        //layout.setDragView(findViewById(R.id.content_main_info));
-
-        final Toolbar mainToolbar = (Toolbar) findViewById(R.id.toolbar33);
-        mainToolbar.setContentInsetsAbsolute(0, 0);
-
-
-//        setSupportActionBar(toolbar);
-//        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-
-//        CollapsingToolbarLayout collapsingToolbar = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-//        collapsingToolbar.setTitleEnabled(false);
-//        collapsingToolbar.setTitle("Second Activity");
-
-        mPager = (ViewPager) findViewById(R.id.pager);
-
-//        mPager.setPageMargin(20);
-//        mPager.setPageMarginDrawable(R.color.blueColor);
-//        mPager.setPageMarginDrawable(int)
-
-//        int pagerPadding = 50;
-//        mPager.setClipToPadding(false);
-//        mPager.setPadding(pagerPadding, 0, pagerPadding, 0);
-        indicator = (CirclePageIndicator)
-                findViewById(R.id.indicator);
-        baner_progress = (ProgressBar) findViewById(R.id.baner_progress);
-        drName = (TextView) findViewById(R.id.content_main_name);
-        drExpert = (TextView) findViewById(R.id.content_main_expert);
-        drAddress = (TextView) findViewById(R.id.content_main_address);
-        drPhone = (TextView) findViewById(R.id.content_main_tel);
-        drBiography = (TextView) findViewById(R.id.content_main_biography);
-        btn_menu = (ImageButton) findViewById(R.id.menu_btn);
-
-        setNavigationDrawer();
-
-        mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-
-        mapFragment.getMapAsync(this);
-
-        btnCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_CALL);
-                intent.setData(Uri.parse("tel:" + G.officeInfo.getPhone()));
-                startActivity(intent);
-            }
-        });
-
-        btn_menu.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mDrawerLayout.openDrawer(Gravity.RIGHT);
-            }
-        });
-
-        fab_getTurn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, DrProfileActivity.class));
-            }
-        });
-
-        nav_listview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-                switch (menuItems.get(position).getItemId()) {
-                    case R.id.nav2_clinic:
-                        startActivity(new Intent(MainActivity.this, DrClinicActivity.class));
-                        break;
-                    case R.id.nav2_addTurn:
-                        startActivity(new Intent(MainActivity.this, DrProfileActivity.class));
-                        break;
-                    case R.id.nav2_manage_nobat:
-                        startActivity(new Intent(MainActivity.this, DrNobatActivity.class));
-                        break;
-                    case R.id.nav2_gallery:
-                        startActivity(new Intent(MainActivity.this, gallery2.class));
-                        break;
-                    case R.id.nav2_taskes:
-                        startActivity(new Intent(MainActivity.this, ActivityManagementTaskes.class));
-                        break;
-                    case R.id.nav2_secretary:
-                        startActivity(new Intent(MainActivity.this, ActivityManageSecretary.class));
-                        break;
-                    case R.id.nav2_map:
-                        startActivity(new Intent(MainActivity.this, MapActivity.class));
-                        break;
-                    case R.id.nav2_patientFile:
-                        startActivity(new Intent(MainActivity.this, ActivitySearchPatient.class));
-                        break;
-                    case R.id.nav2_question:
-                        startActivity(new Intent(MainActivity.this, ActivityCreateQuestion.class));
-                        break;
-                    case R.id.nav2_user_patientFile:
-                        Intent intent = new Intent(MainActivity.this, ActivityPatientFile.class);
-                        intent.putExtra("patientUserName", G.UserInfo.getUserName());
-                        startActivity(intent);
-                        break;
-                    case R.id.nav2_my_nobat:
-                        startActivity(new Intent(MainActivity.this, UserMyNobatActivity.class));
-                        break;
-                    case R.id.nav2_news:
-                        startActivity(new Intent(MainActivity.this, UserNewsActivity.class));
-                        break;
-                    case R.id.nav2_assistant:
-                        startActivity(new Intent(MainActivity.this, ActivityAssistant.class));
-                        break;
-                    default:
-                        break;
-                }
-                drawer.closeDrawer(Gravity.RIGHT);
-            }
-        });
-        btn_getReception.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ActivityPatientListToday.class));
-            }
-        });
-        btn_notice.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(MainActivity.this, ManagementNotificationActivity.class));
-            }
-        });
-
-    }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -403,8 +425,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void loadUser() {
-        menu = UserType.values()[G.UserInfo.getRole()];
-
+        menu = UserType.values()[G.officeInfo.getRole()];
         switch (menu) {
             case Dr:
                 menu = UserType.Dr;
@@ -443,43 +464,74 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         menu_header_version = (TextView) navigationView.findViewById(R.id.pezashyar_type33);
     }
 
-    private void setNavigationItem(UserType user) {
+    private void setNavigationSetttingItem(UserType user) {
         PopupMenu p = new PopupMenu(this, null);
         Menu menu = p.getMenu();
         getMenuInflater().inflate(R.menu.activity_main_drawer, menu);
+        adapter_nav.removeAll();
+        menuItems.clear();
         switch (user) {
-            case User:
-                menuItems.add(menu.findItem(R.id.nav2_addTurn));
-                menuItems.add(menu.findItem(R.id.nav2_user_patientFile));
-                menuItems.add(menu.findItem(R.id.nav2_my_nobat));
-                menuItems.add(menu.findItem(R.id.nav2_gallery));
-                break;
             case Dr:
-                menuItems.add(menu.findItem(R.id.nav2_addTurn));
-                menuItems.add(menu.findItem(R.id.nav2_manage_nobat));
-                menuItems.add(menu.findItem(R.id.nav2_patientFile));
-                menuItems.add(menu.findItem(R.id.nav2_gallery));
-                menuItems.add(menu.findItem(R.id.nav2_clinic));
-                menuItems.add(menu.findItem(R.id.nav2_taskes));
-                menuItems.add(menu.findItem(R.id.nav2_map));
+                menuItems.add(menu.findItem(R.id.nav2_back));
+                menuItems.add(menu.findItem(R.id.nav2_account));
                 menuItems.add(menu.findItem(R.id.nav2_secretary));
                 menuItems.add(menu.findItem(R.id.nav2_assistant));
+                menuItems.add(menu.findItem(R.id.nav2_taskes));
+                menuItems.add(menu.findItem(R.id.nav2_clinic));
+                menuItems.add(menu.findItem(R.id.nav2_map));
                 menuItems.add(menu.findItem(R.id.nav2_question));
                 break;
             case secretary:
-                menuItems.add(menu.findItem(R.id.nav2_addTurn));
-                menuItems.add(menu.findItem(R.id.nav2_manage_nobat));
-                menuItems.add(menu.findItem(R.id.nav2_patientFile));
-                menuItems.add(menu.findItem(R.id.nav2_gallery));
-                menuItems.add(menu.findItem(R.id.nav2_clinic));
-                menuItems.add(menu.findItem(R.id.nav2_taskes));
-                menuItems.add(menu.findItem(R.id.nav2_map));
+                menuItems.add(menu.findItem(R.id.nav2_back));
+                menuItems.add(menu.findItem(R.id.nav2_account));
                 menuItems.add(menu.findItem(R.id.nav2_assistant));
+                menuItems.add(menu.findItem(R.id.nav2_taskes));
+                menuItems.add(menu.findItem(R.id.nav2_clinic));
+                menuItems.add(menu.findItem(R.id.nav2_map));
                 menuItems.add(menu.findItem(R.id.nav2_question));
                 break;
         }
         adapter_nav.addAll(menuItems);
     }
+
+    private void setNavigationItem(UserType user) {
+        PopupMenu p = new PopupMenu(this, null);
+        Menu menu = p.getMenu();
+        getMenuInflater().inflate(R.menu.activity_main_drawer, menu);
+        adapter_nav.removeAll();
+        menuItems.clear();
+        switch (user) {
+            case User:
+                menuItems.add(menu.findItem(R.id.nav2_myOffice));
+                menuItems.add(menu.findItem(R.id.nav2_account));
+                menuItems.add(menu.findItem(R.id.nav2_etebar));
+                menuItems.add(menu.findItem(R.id.nav2_my_nobat));
+                menuItems.add(menu.findItem(R.id.nav2_user_patientFile));
+                menuItems.add(menu.findItem(R.id.nav2_gallery));
+                menuItems.add(menu.findItem(R.id.nav2_inbox));
+                menuItems.add(menu.findItem(R.id.nav2_support));
+                break;
+            case Dr:
+            case secretary:
+                menuItems.add(menu.findItem(R.id.nav2_myOffice));
+                menuItems.add(menu.findItem(R.id.nav2_manage_nobat));
+                menuItems.add(menu.findItem(R.id.nav2_addTurn));
+                menuItems.add(menu.findItem(R.id.nav2_patientFile));
+                menuItems.add(menu.findItem(R.id.nav2_gallery));
+                menuItems.add(menu.findItem(R.id.nav2_inbox));
+                menuItems.add(menu.findItem(R.id.nav2_setting));
+                menuItems.add(menu.findItem(R.id.nav2_support));
+                break;
+            case Assistant:
+                menuItems.add(menu.findItem(R.id.nav2_myOffice));
+                menuItems.add(menu.findItem(R.id.nav2_account));
+                menuItems.add(menu.findItem(R.id.nav2_inbox));
+                menuItems.add(menu.findItem(R.id.nav2_support));
+                break;
+        }
+        adapter_nav.addAll(menuItems);
+    }
+
 
     private void setNavigationViewMenu(UserType menu) {
 
@@ -509,113 +561,171 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onBackPressed() {
-        super.onBackPressed();
-        onPause();
-        G.UserInfo.setRole(G.getSharedPreferences().getInt("role", 0));
-        G.officeInfo = new Office();
-        G.doctorImageProfile = null;
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+            return;
+        }
+        this.doubleBackToExitPressedOnce = true;
+        Toast.makeText(this, "برای خروج دو بار دکمه BACK را بزنید", Toast.LENGTH_SHORT).show();
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
     }
 
-    private class asyncGetGalleryPic extends AsyncTask<String, Void, Void> {
-        private String msg = null;
-        private PhotoDesc photo;
-        private int photoId;
-        private int currentPageNum;
-        private boolean existInPhone = true;
+    private void getGalleryPicIds() {
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
+        MyObservable.getGalleryPicIds(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<Integer>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-                photoId = Integer.parseInt(strings[0]);
-                currentPageNum = Integer.parseInt(strings[1]);
-                if (database.openConnection()) {
-                    photo = database.getImageFromGallery(photoId);
-                }
-                if (photo == null) {
-                    existInPhone = false;
-                    photo = WebService.invokeGetGalleryPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                            , G.officeId, photoId);
-                }
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
+                    }
 
-            return null;
-        }
+                    @Override
+                    public void onNext(ArrayList<Integer> picIds) {
+                        if (picIds.isEmpty()) {
+                            banerTaskList = new ArrayList<Boolean>();
+                            baners = new ArrayList<PhotoDesc>();
+                            PhotoDesc aks = new PhotoDesc();
+                            aks.setId(-1);
+                            aks.setDescription("");
+                            aks.setDate("");
+                            aks.setPhoto(BitmapFactory.decodeResource(getResources(), R.mipmap.doctor_temp));
+                            baners.add(aks);
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                new MessageBox(MainActivity.this, msg).show();
-            } else {
-                if (photo != null) {
-                    if (!existInPhone) {
-                        if (database.openConnection()) {
-                            database.saveImageToGallery(photo.getId(), photo.getDate(),
-                                    photo.getDescription(), DbBitmapUtility.getBytes(photo.getPhoto()));
+                            mPager.setAdapter(new SlidingImage_Adapter(MainActivity.this, baners));
+                            indicator.setVisibility(View.GONE);
+
+                        } else {
+                            indicator.setVisibility(View.VISIBLE);
+                            initSlideShow(picIds);
                         }
                     }
 
-                    baners.set(currentPageNum, photo);
-                    mPager.getAdapter().notifyDataSetChanged();
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(MainActivity.this, e.getMessage()).show();
+                    }
 
-                }
-            }
-
-        }
+                    @Override
+                    public void onComplete() {
+                        baner_progress.setVisibility(View.GONE);
+                    }
+                });
     }
 
+    private void getGalleryPicFromPhone(final int photoId, final int currentPageNum) {
+        MyObservable.getGalleryPicFromPhone(photoId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<PhotoDesc>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-    private class asyncGetImageIdFromWeb extends AsyncTask<String, Void, Void> {
+                    }
 
-        private ArrayList<Integer> imageIdsInWeb = null;
-        private String msg = null;
+                    @Override
+                    public void onNext(PhotoDesc photo) {
+                        baners.set(currentPageNum, photo);
+                        mPager.getAdapter().notifyDataSetChanged();
+                    }
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            if (banerTaskList == null)
-                baner_progress.setVisibility(View.VISIBLE);
-        }
+                    @Override
+                    public void onError(Throwable e) {
+                        getGalleryPicFromWeb(photoId, currentPageNum);
+                    }
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                imageIdsInWeb = WebService.invokegetAllGalleryPicIdWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
+                    @Override
+                    public void onComplete() {
 
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            baner_progress.setVisibility(View.GONE);
-            if (msg != null) {
-                new MessageBox(MainActivity.this, msg).show();
-            } else {
-                if (imageIdsInWeb != null && imageIdsInWeb.size() > 0) {
-                    indicator.setVisibility(View.VISIBLE);
-                    initSlideShow(imageIdsInWeb);
-
-                } else {
-                    banerTaskList = new ArrayList<Boolean>();
-                    baners = new ArrayList<PhotoDesc>();
-                    PhotoDesc aks = new PhotoDesc();
-                    aks.setId(-1);
-                    aks.setDescription("");
-                    aks.setDate("");
-                    aks.setPhoto(BitmapFactory.decodeResource(getResources(), R.mipmap.doctor_temp));
-                    baners.add(aks);
-
-                    mPager.setAdapter(new SlidingImage_Adapter(MainActivity.this, baners));
-                    indicator.setVisibility(View.GONE);
-                }
-            }
-        }
+                    }
+                });
     }
+
+    private void getGalleryPicFromWeb(int photoId, final int currentPageNum) {
+
+
+        MyObservable.getGalleryPicFromWeb(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), photoId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<PhotoDesc>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(PhotoDesc photo) {
+                        if (photo.photo != null) {
+                            baners.set(currentPageNum, photo);
+                            mPager.getAdapter().notifyDataSetChanged();
+                            try {
+                                if (database.openConnection()) {
+                                    database.saveImageToGallery(photo.getId(), photo.getDate(),
+                                            photo.getDescription(), DbBitmapUtility.getBytes(photo.getPhoto()));
+                                }
+                            } catch (MyException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(MainActivity.this, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    private void getUnreadMessage() {
+        MyObservable.getAllUnreadMessage(G.UserInfo.getUserName(), G.UserInfo.getPassword())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<MessageInfo>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ArrayList<MessageInfo> messageInfos) {
+                        if (!messageInfos.isEmpty()) {
+                            unreadMessages = new ArrayList<MessageInfo>();
+                            unreadMessages.addAll(messageInfos);
+                            badge.setText(String.valueOf(messageInfos.size()));
+                            badge.show();
+                        } else {
+                            if (unreadMessages != null)
+                                unreadMessages.clear();
+                            badge.hide();
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(MainActivity.this, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
 }
 

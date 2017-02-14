@@ -216,7 +216,7 @@ public class CustomListAdapterAddNextTurn extends BaseExpandableListAdapter {
 
             try {
                 result = WebService.invokeResevereForUser(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

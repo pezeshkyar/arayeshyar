@@ -1,6 +1,5 @@
 package com.example.doctorsbuilding.nav.Web;
 
-import android.app.DownloadManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Base64;
@@ -11,7 +10,7 @@ import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.Expert;
 import com.example.doctorsbuilding.nav.G;
 import com.example.doctorsbuilding.nav.MessageInfo;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.PatientAssistant;
 import com.example.doctorsbuilding.nav.PatientFile;
 import com.example.doctorsbuilding.nav.PatientInfo;
@@ -46,11 +45,9 @@ import org.ksoap2.serialization.SoapSerializationEnvelope;
 import org.ksoap2.transport.HttpTransportSE;
 
 import java.io.ByteArrayOutputStream;
-import java.net.Authenticator;
 import java.net.ConnectException;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Objects;
 import java.util.TreeMap;
 
 public class WebService {
@@ -67,10 +64,30 @@ public class WebService {
     private static final String otherMessage = Util.getStringWS(R.string.ws_otherMessage);
     private static final String isOnlineMessage = Util.getStringWS(R.string.ws_isOnlineMessage);
 
-    public static ArrayList<State> invokeGetProvinceNameWS() throws PException {
+    private static String getPropertyValue(Object obj) {
+        String value;
+        if (obj == null || obj.toString().equals("anyType{}"))
+            value = "";
+        else {
+            value = obj.toString();
+        }
+        return value;
+    }
+
+    // convert from bitmap to byte array
+    public static byte[] getBytes(Bitmap bitmap) {
+        if (bitmap == null) return null;
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+
+
+    }
+
+    public static ArrayList<State> invokeGetProvinceNameWS() throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_getProvince);
@@ -94,17 +111,17 @@ public class WebService {
             }
             result = states;
         } catch (ConnectException e) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception e) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<City> invokeGetCityNameWS(int stateID) throws PException {
+    public static ArrayList<City> invokeGetCityNameWS(int stateID) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_getCityOfProvince);
@@ -132,18 +149,18 @@ public class WebService {
             }
             result = cities;
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-    public static String invokeRegisterWS(User user) throws PException {
+    public static String invokeRegisterWS(User user) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_register);
@@ -169,18 +186,18 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeUpdateUserWS(String username, String password, User user) throws PException {
+    public static String invokeUpdateUserWS(String username, String password, User user) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-        String webMethName = Util.getStringWS(R.string.ws_updateUserInfo3);
+        String webMethName = Util.getStringWS(R.string.ws_updateUserInfo);
         String result = null;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -201,60 +218,20 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    // convert from bitmap to byte array
-    public static byte[] getBytes(Bitmap bitmap) {
-        if (bitmap == null) return null;
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        return stream.toByteArray();
-
-
-    }
-
-//    public static int invokeLoginWS(int officeId, User user) throws PException {
-//
-//        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
-//        }
-//
-//        String webMethName = "login2";
-//        int result = -1;
-//        SoapObject request = new SoapObject(NAMESPACE, webMethName);
-//
-//        request.addProperty("username", user.getUserName());
-//        request.addProperty("password", user.getPassword());
-//        request.addProperty("officeId", officeId);
-//
-//        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-//        envelope.setOutputSoapObject(request);
-//        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
-//        try {
-//            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
-//            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
-//            result = Integer.parseInt(response.toString());
-//        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
-//        } catch (Exception ex) {
-//            throw new PException(otherMessage);
-//        }
-//        return result;
-//    }
-
-    public static int invokeLogin3WS(String username, String password) throws PException {
+    public static int invokeGetRoleInAllWS(String username, String password) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-
+        int result = 0;
         String webMethName = Util.getStringWS(R.string.ws_getRoleInAll);
-        int result = -1;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -268,81 +245,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-//    public static String invokeNewLoginWS(String username, String password) throws PException {
-//
-//        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
-//        }
-//
-//        String webMethName = "login";
-//        String result = null;
-//        SoapObject request = new SoapObject(NAMESPACE, webMethName);
-//
-//        request.addProperty("username", username);
-//        request.addProperty("password", password);
-//
-//        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-//        envelope.setOutputSoapObject(request);
-//        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
-//        try {
-//            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
-//            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
-//            result = response.toString();
-//        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
-//        } catch (Exception ex) {
-//            throw new PException(otherMessage);
-//        }
-//        return result;
-//    }
-
-//    public static Boolean invokeAddTurnWs(String name, String webMethName, String username
-//            , String password, int officeId, String date, int startHour
-//            , int startMin, int duration, int capacity) throws PException
-//
-//    {
-//        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
-//        }
-//        boolean result = false;
-//        SoapObject request = new SoapObject(NAMESPACE, webMethName);
-//
-//        request.addProperty("username", username);
-//        request.addProperty("password", password);
-//        request.addProperty("officeId", officeId);
-//        request.addProperty("date", date);
-//        request.addProperty("startHour", startHour);
-//        request.addProperty("startMin", startMin);
-//        request.addProperty("duration", duration);
-//        request.addProperty("capacity", capacity);
-//
-//        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
-//        envelope.setOutputSoapObject(request);
-//        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
-//        try {
-//            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
-//            SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
-//            result = Boolean.valueOf(response.toString());
-//        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
-//        } catch (Exception ex) {
-//            throw new PException(otherMessage);
-//        }
-//
-//        return result;
-//    }
-
-    public static User invokeGetUserInfoWS(String username, String password, int officeId) throws PException {
+    public static User invokeGetUserInfoWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getUserInfoWithoutPic);
         User user = null;
@@ -388,21 +301,68 @@ public class WebService {
                 user.setEmail("");
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
+        }
+
+        return user;
+    }
+
+    public static User invokeGetUserInfoWithPicWS(String username, String password) throws MyException {
+        if (!G.isOnline()) {
+            throw new MyException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getUserInfo);
+        User user = new User();
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        PropertyInfo property = new PropertyInfo();
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), -1);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.getResponse();
+            if (response != null) {
+                user.setFirstName(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_name))));
+                user.setLastName(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_lastname))));
+                user.setPhone(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_mobileno))));
+                user.setUserName(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_username))));
+                user.setRole(Integer.parseInt(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_role)))));
+                user.setCityID(Integer.parseInt(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_cityid)))));
+                user.setCityName(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_city))));
+                user.setStateID(Integer.parseInt(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_provinceid)))));
+                user.setStateName(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_province))));
+                if (getPropertyValue(response.getProperty("pic")).equals("")) {
+                    user.setImgProfile(BitmapFactory.decodeResource(G.context.getResources(), R.mipmap.doctor_temp));
+                } else {
+                    byte[] imgbytes = Base64.decode(getPropertyValue(response.getProperty("pic")), Base64.DEFAULT);
+                    user.setImgProfile(BitmapFactory.decodeByteArray(imgbytes, 0, imgbytes.length));
+                }
+                user.setPassword(password);
+                user.setEmail(getPropertyValue(response.getProperty(Util.getStringWS(R.string.ws_email))));
+            }
+        } catch (ConnectException ex) {
+            throw new MyException(connectMessage);
+        } catch (Exception ex) {
+            throw new MyException(otherMessage);
         }
 
         return user;
     }
 
 
-    public static Office invokeGetOfficeInfoWS(String username, String password, int officeId) throws PException {
+    public static Office invokeGetOfficeInfoWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeInfo);
-        Office office = null;
+        Office office = new Office();
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         PropertyInfo property = new PropertyInfo();
@@ -418,7 +378,6 @@ public class WebService {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
             SoapObject response = (SoapObject) envelope.getResponse();
             if (response != null) {
-                office = new Office();
                 office.setId(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
                 office.setDrUsername(response.getProperty(Util.getStringWS(R.string.ws_doctorUsername)).toString());
                 office.setFirstname(response.getProperty(Util.getStringWS(R.string.ws_doctorName)).toString());
@@ -443,16 +402,16 @@ public class WebService {
                 office.setTimeQuantum(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_timeQuantum)).toString()));
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return office;
     }
 
-    public static ArrayList<Office> invokeGetOfficeForUserWS(String username, String password) throws PException {
+    public static ArrayList<Office> invokeGetOfficeForUserWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeForUser);
         Office office = null;
@@ -503,16 +462,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return offices;
     }
 
-    public static ArrayList<Office> invokeGetOfficeForAssistantWS(String username, String password) throws PException {
+    public static ArrayList<Office> invokeGetOfficeForAssistantWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeForBarber);
         Office office = null;
@@ -563,16 +522,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return offices;
     }
 
-    public static ArrayList<Office> invokeGetAllOfficesForCityWS(String username, String password, int cityId, int count, int index) throws PException {
+    public static ArrayList<Office> invokeGetAllOfficesForCityWS(String username, String password, int cityId, int count, int index) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getAllOfficeForCity);
         Office office = null;
@@ -626,17 +585,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return offices;
     }
 
 
-    public static ArrayList<Office> invokeGetOfficeForDoctorOrSecretaryWS(String username, String password) throws PException {
+    public static ArrayList<Office> invokeGetOfficeForDoctorOrSecretaryWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeForDoctorOrSecretary);
         Office office = null;
@@ -681,23 +640,23 @@ public class WebService {
                         office.setBiography("");
                     }
                     office.setTimeQuantum(Integer.parseInt(object.getProperty(Util.getStringWS(R.string.ws_timeQuantum)).toString()));
-                    office.setMyOffice(Boolean.valueOf(object.getProperty(Util.getStringWS(R.string.ws_isMyOffice)).toString()));
+//                    office.setRole(Boolean.valueOf(object.getProperty(Util.getStringWS(R.string.ws_isMyOffice)).toString()));
                     offices.add(office);
 
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return offices;
     }
 
     public static ArrayList<Office> invokeGetOfficeByFilterWS(String username, String password
-            , int provinceId, int cityId, int specId, int subspecId, String firstname, String lastname, int count, int index) throws PException {
+            , int provinceId, int cityId, int specId, int subspecId, String firstname, String lastname, int count, int index) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getOfficeByFilter);
         Office office = null;
@@ -758,22 +717,21 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return offices;
     }
 
-    public static Bitmap invokeGetDoctorPicWS(String username, String password, int officeId) throws PException {
+    public static Bitmap invokeGetDoctorPicWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getDoctorPic);
-        Bitmap pic = null;
+        Bitmap pic = BitmapFactory.decodeResource(G.context.getResources(), R.mipmap.doctor_temp);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
-        PropertyInfo property = new PropertyInfo();
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
         request.addProperty(Util.getStringWS(R.string.ws_password), password);
         request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
@@ -791,16 +749,16 @@ public class WebService {
                 pic = BitmapFactory.decodeByteArray(imgbytes, 0, imgbytes.length);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return pic;
     }
 
-    public static Bitmap invokeGetUserPicWS(String username, String password) throws PException {
+    public static Bitmap invokeGetUserPicWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getUserPic);
         Bitmap pic = null;
@@ -824,18 +782,18 @@ public class WebService {
                 pic = BitmapFactory.decodeByteArray(imgbytes, 0, imgbytes.length);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return pic;
     }
 
-    public static boolean invokeUpdateUserPicWS(String username, String password, Bitmap pic) throws PException {
+    public static boolean invokeUpdateUserPicWS(String username, String password, Bitmap pic) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-        String webMethName = Util.getStringWS(R.string.ws_updateUserPic2);
+        String webMethName = Util.getStringWS(R.string.ws_updateUserPic);
         boolean result = false;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
@@ -857,16 +815,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static boolean invokeUpdateOfficeLatLngWS(String username, String password, int officeId, double latitude, double longitude) throws PException {
+    public static boolean invokeUpdateOfficeLatLngWS(String username, String password, int officeId, double latitude, double longitude) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_updateOfficeLocation);
         boolean result = false;
@@ -885,16 +843,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Expert> invokeGetSpecWS() throws PException {
+    public static ArrayList<Expert> invokeGetSpecWS() throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getSpec);
         Expert expert;
@@ -916,16 +874,16 @@ public class WebService {
             }
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return experts;
     }
 
-    public static ArrayList<SubExpert> invokeGetSubSpecWS(int specId) throws PException {
+    public static ArrayList<SubExpert> invokeGetSubSpecWS(int specId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getSubSpec);
         SubExpert subExpert;
@@ -950,16 +908,16 @@ public class WebService {
             }
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return subExperts;
     }
 
-    public static boolean invokeUpdateOfficeWS(String username, String password, Office office) throws PException {
+    public static boolean invokeUpdateOfficeWS(String username, String password, Office office) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_updateOfficeInfo);
         boolean result = false;
@@ -985,16 +943,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Turn> invokeGetAllTurnFromToday(String username, String password, int officeId) throws PException {
+    public static ArrayList<Turn> invokeGetAllTurnFromToday(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Turn turn;
         ArrayList<Turn> result = new ArrayList<Turn>();
@@ -1030,16 +988,16 @@ public class WebService {
                 result.add(turn);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static int invokeResevereForUser(String username, String password, Reservation reservation) throws PException {
+    public static int invokeResevereForUser(String username, String password, Reservation reservation) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_reserveForUser);
         int result = 0;
@@ -1062,16 +1020,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeCancleReservation(String username, String password, int reservationId) throws PException {
+    public static String invokeCancleReservation(String username, String password, int reservationId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_cancelReservation);
         String result = null;
@@ -1091,16 +1049,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<User> invokeSearchUserWS(String username, String name, String lastName, String mobileNo) throws PException {
+    public static ArrayList<User> invokeSearchUserWS(String username, String name, String lastName) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         User user = null;
         ArrayList<User> users = new ArrayList<User>();
@@ -1110,8 +1068,7 @@ public class WebService {
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
         request.addProperty(Util.getStringWS(R.string.ws_name), name);
         request.addProperty(Util.getStringWS(R.string.ws_lastName), lastName);
-        request.addProperty(Util.getStringWS(R.string.ws_mobileNo), mobileNo);
-        request.addProperty(Util.getStringWS(R.string.ws_officeId), G.officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), G.officeInfo.getId());
 
         SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
         envelope.setOutputSoapObject(request);
@@ -1124,24 +1081,24 @@ public class WebService {
 
                 SoapObject obj = (SoapObject) response.getProperty(i);
                 user = new User();
-                user.setUserName(obj.getProperty(Util.getStringWS(R.string.ws_username)).toString());
-                user.setFirstName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
-                user.setLastName(obj.getProperty(Util.getStringWS(R.string.ws_lastname)).toString());
-                user.setPhone(obj.getProperty(Util.getStringWS(R.string.ws_mobileno)).toString());
-                user.setCityName(obj.getProperty(Util.getStringWS(R.string.ws_city)).toString());
+                user.setUserName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_username))));
+                user.setFirstName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_name))));
+                user.setLastName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_lastname))));
+                user.setPhone(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_mobileno))));
+                user.setCityName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_city))));
                 users.add(user);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return users;
     }
 
-    public static ArrayList<Reservation> invokeGetReservationByTurnIdWS(String username, String password, int officeId, int turnId) throws PException {
+    public static ArrayList<Reservation> invokeGetReservationByTurnIdWS(String username, String password, int officeId, int turnId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Reservation reservation = null;
         ArrayList<Reservation> reservations = new ArrayList<Reservation>();
@@ -1178,17 +1135,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return reservations;
     }
 
 //    public static ArrayList<Reservation> invokeGetReservationByDateWS(String username, String password, int officeId
-//            , String fromDate, String toDate) throws PException {
+//            , String fromDate, String toDate) throws MyException {
 //        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
+//            throw new MyException(isOnlineMessage);
 //        }
 //        Reservation reservationInfo = null;
 //        ArrayList<Reservation> reservations = new ArrayList<Reservation>();
@@ -1224,16 +1181,16 @@ public class WebService {
     //                reservations.add(reservationInfo);
 //            }
 //        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
+//            throw new MyException(connectMessage);
 //        } catch (Exception ex) {
-//            throw new PException(otherMessage);
+//            throw new MyException(otherMessage);
 //        }
 //        return reservations;
 //    }
 
-    public static ArrayList<Task> invokeGetTaskWS(String username, String password, int officeId, int taskGroupId) throws PException {
+    public static ArrayList<Task> invokeGetTaskWS(String username, String password, int officeId, int taskGroupId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Task task = null;
         ArrayList<Task> taskes = new ArrayList<Task>();
@@ -1258,26 +1215,66 @@ public class WebService {
                 task = new Task();
                 task.setId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
                 task.setOfficeId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_officeId)).toString()));
-                task.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
+                task.setName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_name))));
                 task.setPrice(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_price)).toString()));
                 task.setGroupId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_taskGroupId)).toString()));
                 taskes.add(task);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return taskes;
     }
 
-    public static ArrayList<TaskGroup> invokeGetTaskGroupsWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<TaskGroup> invokeGetTaskGroupsWS(String username, String password, int officeId, int turnId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         TaskGroup task = null;
         ArrayList<TaskGroup> taskGroups = new ArrayList<TaskGroup>();
         String webMethName = Util.getStringWS(R.string.ws_getTaskGroups);
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+        request.addProperty(Util.getStringWS(R.string.ws_officeId), officeId);
+        request.addProperty(Util.getStringWS(R.string.ws_turnId), turnId);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            for (int i = 0; i < response.getPropertyCount(); i++) {
+
+                SoapObject obj = (SoapObject) response.getProperty(i);
+                if (obj != null) {
+                    task = new TaskGroup();
+                    task.setId(Integer.parseInt(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_id)))));
+                    task.setOfficeId(Integer.parseInt(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_officeId)))));
+                    task.setName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_name))));
+                    taskGroups.add(task);
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new MyException(connectMessage);
+        } catch (Exception ex) {
+            throw new MyException(otherMessage);
+        }
+        return taskGroups;
+    }
+
+    public static ArrayList<TaskGroup> invokeGetAllTaskGroupsWS(String username, String password, int officeId) throws MyException {
+        if (!G.isOnline()) {
+            throw new MyException(isOnlineMessage);
+        }
+        TaskGroup task = null;
+        ArrayList<TaskGroup> taskGroups = new ArrayList<TaskGroup>();
+        String webMethName = Util.getStringWS(R.string.ws_getAllTaskGroups);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -1303,16 +1300,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return taskGroups;
     }
 
-    public static int invokeReserveForGuestWS(String username, String password, Reservation reservation, int cityId) throws PException {
+
+    public static int invokeReserveForGuestWS(String username, String password, Reservation reservation, int cityId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         int result = 0;
         String webMethName = Util.getStringWS(R.string.ws_reserveForGuest);
@@ -1340,16 +1338,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static int invokeGetWalletWS(String username, String password) throws PException {
+    public static int invokeGetWalletWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         int result = 0;
         String webMethName = Util.getStringWS(R.string.ws_getWallet);
@@ -1367,17 +1365,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-    public static int invokeReserveForGuestFromUserWS(String username, String password, Reservation reservation, int resNum) throws PException {
+    public static int invokeReserveForGuestFromUserWS(String username, String password, Reservation reservation, int resNum) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         int result = 0;
         String webMethName = Util.getStringWS(R.string.ws_reserveForGuestFromUser);
@@ -1406,16 +1404,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static int invokeReserveForMeWS(String username, String password, Reservation reservation, int resNum) throws PException {
+    public static int invokeReserveForMeWS(String username, String password, Reservation reservation, int resNum) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         int result = 0;
         String webMethName = Util.getStringWS(R.string.ws_reserveForMe);
@@ -1440,17 +1438,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
     public static boolean invokeAddTurnByDateWS(String username, String password, int officeId
-            , String fromDate, String toDate, int hour, int min, int duration, int capacity, String dayOfWeek) throws PException {
+            , String fromDate, String toDate, int hour, int min, int duration, int capacity, String dayOfWeek) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         boolean result = false;
         String webMethName = Util.getStringWS(R.string.ws_addTurnByDate);
@@ -1476,16 +1474,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Turn> invokeGetAllTurnWS(String username, String password, int officeId, String fromDate, String toDate) throws PException {
+    public static ArrayList<Turn> invokeGetAllTurnWS(String username, String password, int officeId, String fromDate, String toDate) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Turn turn;
         ArrayList<Turn> turns = new ArrayList<Turn>();
@@ -1522,16 +1520,16 @@ public class WebService {
                 turns.add(turn);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return turns;
     }
 
-    public static boolean invokeRemoveTurnWS(String username, String password, int officeId, int turnId) throws PException {
+    public static boolean invokeRemoveTurnWS(String username, String password, int officeId, int turnId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         boolean result = false;
         String webMethName = Util.getStringWS(R.string.ws_removeTurn);
@@ -1551,16 +1549,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Rturn> invokeGetPatientTurnInfoByDate(String username, String password, int officeId, String fromDate, String toDate) throws PException {
+    public static ArrayList<Rturn> invokeGetPatientTurnInfoByDate(String username, String password, int officeId, String fromDate, String toDate) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Rturn rturn = null;
         ArrayList<Rturn> result = new ArrayList<Rturn>();
@@ -1628,18 +1626,18 @@ public class WebService {
                 result.add(rturn);
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
 
     }
 
     public static boolean invokeSendMessageBatchWS(String username, String password
-            , int officeId, ArrayList<String> receivers, ArrayList<String> phoneNos, String subject, String message) throws PException {
+            , int officeId, ArrayList<String> receivers, ArrayList<String> phoneNos, String subject, String message) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         boolean result = false;
@@ -1684,17 +1682,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
-    public static ArrayList<MessageInfo> invokeGetUnreadMessagesWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<MessageInfo> invokeGetUnreadMessagesWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         MessageInfo messageInfo = null;
         ArrayList<MessageInfo> result = null;
@@ -1728,20 +1726,20 @@ public class WebService {
 
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
-    public static ArrayList<MessageInfo> invokeGetAllUnreadMessagesWS(String username, String password) throws PException {
+    public static ArrayList<MessageInfo> invokeGetAllUnreadMessagesWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         MessageInfo messageInfo = null;
-        ArrayList<MessageInfo> result = null;
+        ArrayList<MessageInfo> result = new ArrayList<MessageInfo>();
         String webMethName = Util.getStringWS(R.string.ws_getAllUnreadMessages);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
@@ -1755,7 +1753,6 @@ public class WebService {
         try {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
             SoapObject response = (SoapObject) envelope.bodyIn;
-            result = new ArrayList<MessageInfo>();
             for (int i = 0; i < response.getPropertyCount(); i++) {
                 SoapObject obj = (SoapObject) response.getProperty(i);
                 messageInfo = new MessageInfo();
@@ -1771,18 +1768,18 @@ public class WebService {
 
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
 
-//    public static ArrayList<MessageInfo> invokeGetAllMessagesWS(String username, String password, int officeId) throws PException {
+//    public static ArrayList<MessageInfo> invokeGetAllMessagesWS(String username, String password, int officeId) throws MyException {
 //        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
+//            throw new MyException(isOnlineMessage);
 //        }
 //        MessageInfo messageInfo = null;
 //        ArrayList<MessageInfo> result = null;
@@ -1816,21 +1813,21 @@ public class WebService {
 //
 //            }
 //        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
+//            throw new MyException(connectMessage);
 //        } catch (Exception ex) {
-//            throw new PException(otherMessage);
+//            throw new MyException(otherMessage);
 //        }
 //
 //        return result;
 //    }
 
-    public static ArrayList<MessageInfo> invokeGetAllMessagesWS(String username, String password) throws PException {
+    public static ArrayList<MessageInfo> invokeGetAllMessagesWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         MessageInfo messageInfo = null;
         ArrayList<MessageInfo> result = null;
-        String webMethName = Util.getStringWS(R.string.ws_getAllMessages1);
+        String webMethName = Util.getStringWS(R.string.ws_getAllMessages);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -1859,17 +1856,17 @@ public class WebService {
 
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
-//    public static void invokeSetMessageReadWS(String username, String password, int officeId, int messageId) throws PException {
+//    public static void invokeSetMessageReadWS(String username, String password, int officeId, int messageId) throws MyException {
 //        if (!G.isOnline()) {
-//            throw new PException(isOnlineMessage);
+//            throw new MyException(isOnlineMessage);
 //        }
 //        String webMethName = "setMessageRead";
 //        SoapObject request = new SoapObject(NAMESPACE, webMethName);
@@ -1886,17 +1883,17 @@ public class WebService {
 //        try {
 //            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
 //        } catch (ConnectException ex) {
-//            throw new PException(connectMessage);
+//            throw new MyException(connectMessage);
 //        } catch (Exception ex) {
-//            throw new PException(otherMessage);
+//            throw new MyException(otherMessage);
 //        }
 //    }
 
-    public static void invokeSetMessageRead2WS(String username, String password, int messageId) throws PException {
+    public static void invokeSetMessageRead2WS(String username, String password, int messageId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-        String webMethName = Util.getStringWS(R.string.ws_setMessageRead2);
+        String webMethName = Util.getStringWS(R.string.ws_setMessageRead);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -1910,15 +1907,15 @@ public class WebService {
         try {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
     }
 
-    public static ArrayList<ReservationByUser> invokeGetReservayionByUserWS(String username, String password, int officeId, int count, int index) throws PException {
+    public static ArrayList<ReservationByUser> invokeGetReservayionByUserWS(String username, String password, int officeId, int count, int index) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         ReservationByUser reserve = null;
         ArrayList<ReservationByUser> result = null;
@@ -1967,20 +1964,20 @@ public class WebService {
 
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
-    public static boolean invokeRemoveMessageWS(String username, String password, int officeId, int messageId) throws PException {
+    public static boolean invokeRemoveMessageWS(String username, String password, int officeId, int messageId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         Boolean result = false;
-        String webMethName = Util.getStringWS(R.string.ws_removeMessage2);
+        String webMethName = Util.getStringWS(R.string.ws_removeMessage);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         request.addProperty(Util.getStringWS(R.string.ws_username), username);
@@ -1996,18 +1993,18 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
     public static boolean invokeReceptionWS(String username, String password, int officeId,
-                                            int reservationId, int payment, String description) throws PException {
+                                            int reservationId, int payment, String description) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         boolean result = false;
         String webMethName = Util.getStringWS(R.string.ws_reception);
@@ -2029,17 +2026,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
 
-    public static ArrayList<PatientInfo> invokeGetTodayPatientWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<PatientInfo> invokeGetTodayPatientWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         PatientInfo patientInfo = null;
         ArrayList<PatientInfo> patientInfos = new ArrayList<PatientInfo>();
@@ -2087,17 +2084,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return patientInfos;
     }
 
-    public static Map<Integer, ArrayList<PatientFile>> invokeGetPatientFileWS(String username, String password, int officeId, String patientUsername) throws PException {
+    public static Map<Integer, ArrayList<PatientFile>> invokeGetPatientFileWS(String username, String password, int officeId, String patientUsername) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         PatientFile patientFile = null;
         Map<Integer, ArrayList<PatientFile>> map = null;
@@ -2143,9 +2140,9 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         map = new TreeMap<Integer, ArrayList<PatientFile>>();
         for (int i = 0; i < patientFiles.size(); i++) {
@@ -2174,11 +2171,11 @@ public class WebService {
         return map;
     }
 
-    public static ArrayList<Integer> invokegetAllGalleryPicIdWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<Integer> invokegetAllGalleryPicIdWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-        ArrayList<Integer> imageIds = null;
+        ArrayList<Integer> imageIds = new ArrayList<Integer>();
         String webMethName = Util.getStringWS(R.string.ws_getAllGalleryPicId);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
@@ -2194,7 +2191,6 @@ public class WebService {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
             SoapObject response = (SoapObject) envelope.bodyIn;
             if (!isNullBodyIn(response)) {
-                imageIds = new ArrayList<Integer>();
                 for (int i = 0; i < response.getPropertyCount(); i++) {
                     SoapPrimitive obj = (SoapPrimitive) response.getProperty(i);
                     imageIds.add(Integer.parseInt(obj.toString()));
@@ -2202,20 +2198,20 @@ public class WebService {
             }
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return imageIds;
     }
 
-    public static PhotoDesc invokeGetGalleryPicWS(String username, String password, int officeId, int picId) throws PException {
+    public static PhotoDesc invokeGetGalleryPicWS(String username, String password, int officeId, int picId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getGalleryPic);
-        PhotoDesc photoDesc = null;
+        PhotoDesc photoDesc = new PhotoDesc();
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         PropertyInfo property = new PropertyInfo();
@@ -2230,30 +2226,31 @@ public class WebService {
         try {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
             SoapObject response = (SoapObject) envelope.getResponse();
-            photoDesc = new PhotoDesc();
-            photoDesc.setId(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
-            String pic = response.getProperty(Util.getStringWS(R.string.ws_photo)).toString();
-            byte[] imgbytes = Base64.decode(pic, Base64.DEFAULT);
-            photoDesc.setPhoto(BitmapFactory.decodeByteArray(imgbytes, 0, imgbytes.length));
-            if (response.getProperty(Util.getStringWS(R.string.ws_description)).toString().equals("anyType{}"))
-                photoDesc.setDescription("");
-            else
-                photoDesc.setDescription(response.getProperty(Util.getStringWS(R.string.ws_description)).toString());
+            if (response != null) {
+                photoDesc.setId(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
+                String pic = response.getProperty(Util.getStringWS(R.string.ws_photo)).toString();
+                byte[] imgbytes = Base64.decode(pic, Base64.DEFAULT);
+                photoDesc.setPhoto(BitmapFactory.decodeByteArray(imgbytes, 0, imgbytes.length));
+                if (response.getProperty(Util.getStringWS(R.string.ws_description)).toString().equals("anyType{}"))
+                    photoDesc.setDescription("");
+                else
+                    photoDesc.setDescription(response.getProperty(Util.getStringWS(R.string.ws_description)).toString());
 
-            photoDesc.setDate(response.getProperty(Util.getStringWS(R.string.ws_date)).toString());
+                photoDesc.setDate(response.getProperty(Util.getStringWS(R.string.ws_date)).toString());
+            }
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return photoDesc;
     }
 
-    public static int invokeSetGalleryPicWS(String username, String password, int officeId, Bitmap pic, String description) throws PException {
+    public static int invokeSetGalleryPicWS(String username, String password, int officeId, Bitmap pic, String description) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setGalleryPic);
         int id = -1;
@@ -2277,16 +2274,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             id = Integer.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return id;
     }
 
-    public static void invokeDeleteFromGalleryWS(String username, String password, int officeId, int picId) throws PException {
+    public static void invokeDeleteFromGalleryWS(String username, String password, int officeId, int picId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteFromGallery);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
@@ -2304,15 +2301,15 @@ public class WebService {
         try {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
     }
 
-    public static void invokeChangeGalleryPicDescriptionWS(String username, String password, int officeId, int picId, String description) throws PException {
+    public static void invokeChangeGalleryPicDescriptionWS(String username, String password, int officeId, int picId, String description) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_changeGalleryPicDescription);
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
@@ -2331,15 +2328,15 @@ public class WebService {
         try {
             androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
     }
 
-    public static int invokeAddTaskGroupWS(String username, String password, int officeId, String taskNameGroup) throws PException {
+    public static int invokeAddTaskGroupWS(String username, String password, int officeId, String taskNameGroup) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_addTaskGroup);
         int result = 0;
@@ -2360,16 +2357,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeUpdateTaskGroupWS(String username, String password, int officeId, int taskGroupId, String taskNameGroup) throws PException {
+    public static String invokeUpdateTaskGroupWS(String username, String password, int officeId, int taskGroupId, String taskNameGroup) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_updateTaskGroup);
         String result = "";
@@ -2391,16 +2388,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeDeleteTaskGroupWS(String username, String password, int officeId, int taskGroupId) throws PException {
+    public static String invokeDeleteTaskGroupWS(String username, String password, int officeId, int taskGroupId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteTaskGroup);
         String result = "";
@@ -2421,16 +2418,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static int invokeAddTaskWS(String username, String password, int officeId, String name, int taskGroupId, int price) throws PException {
+    public static int invokeAddTaskWS(String username, String password, int officeId, String name, int taskGroupId, int price) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_addTask);
         int result = 0;
@@ -2453,16 +2450,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeUpdateTaskNameWS(String username, String password, int officeId, int taskId, String taskName) throws PException {
+    public static String invokeUpdateTaskNameWS(String username, String password, int officeId, int taskId, String taskName) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_updateTaskName);
         String result = "";
@@ -2484,16 +2481,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeUpdateTaskPriceWS(String username, String password, int officeId, int taskId, int price) throws PException {
+    public static String invokeUpdateTaskPriceWS(String username, String password, int officeId, int taskId, int price) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_updateTaskPrice);
         String result = "";
@@ -2515,17 +2512,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-    public static String invokeDeleteTaskWS(String username, String password, int officeId, int taskId) throws PException {
+    public static String invokeDeleteTaskWS(String username, String password, int officeId, int taskId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteTask);
         String result = "";
@@ -2546,19 +2543,19 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-    public static User invokeAddSecretaryWS(String username, String password, int officeId, String secretary_username) throws PException {
+    public static User invokeAddSecretaryWS(String username, String password, int officeId, String secretary_username) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
-        String webMethName = Util.getStringWS(R.string.ws_addSecretaryToOffice2);
+        String webMethName = Util.getStringWS(R.string.ws_addSecretaryToOffice);
         User user = null;
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
@@ -2582,16 +2579,16 @@ public class WebService {
                 user.setUserName(response.getProperty(Util.getStringWS(R.string.ws_username)).toString());
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return user;
     }
 
-    public static boolean invokeRemoveSecretaryWS(String username, String password, int officeId, String secretary_username) throws PException {
+    public static boolean invokeRemoveSecretaryWS(String username, String password, int officeId, String secretary_username) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_removeSecretaryFromOffice);
         boolean result = false;
@@ -2612,16 +2609,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<User> invokeGetSecretaryInfoWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<User> invokeGetSecretaryInfoWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getSecretaryInfo);
         User secretary = null;
@@ -2652,16 +2649,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return secretary_list;
     }
 
-    public static ArrayList<PhotoDesc> invokeGetPhotoDescsWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<PhotoDesc> invokeGetPhotoDescsWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getAllGalleryPicId2);
         PhotoDesc photo = null;
@@ -2692,16 +2689,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return photos;
     }
 
-    public static ArrayList<Subject> invokeGetTicketSubjectWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<Subject> invokeGetTicketSubjectWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getUserTicketSubject);
         Subject subject = null;
@@ -2730,16 +2727,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return subjects;
     }
 
-    public static ArrayList<Ticket> invokeGetTicketWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<Ticket> invokeGetTicketWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getUserTicket);
         Ticket ticket = null;
@@ -2777,9 +2774,9 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(ex.getMessage());
+            throw new MyException(ex.getMessage());
         }
         return tickets;
     }
@@ -2795,10 +2792,10 @@ public class WebService {
         return res;
     }
 
-    public static int invokeRegisterTicketWS(String username, String password, Integer officeId, Ticket ticket) throws PException {
+    public static int invokeRegisterTicketWS(String username, String password, Integer officeId, Ticket ticket) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_setUserTicket);
@@ -2821,17 +2818,17 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.parseInt(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String invokeSetUserTicketMessageWS(String username, String password, int ticketId, String message) throws PException {
+    public static String invokeSetUserTicketMessageWS(String username, String password, int ticketId, String message) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_setUserTicketMessage);
@@ -2852,18 +2849,18 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
     public static ArrayList<Message> invokeGetUserTicketMessageWS(String username, String password,
-                                                                  Integer officeId, int ticketId) throws PException {
+                                                                  Integer officeId, int ticketId) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_getUserTicketMessage);
@@ -2899,16 +2896,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return messages;
     }
 
-    public static int invokeSetQuestionWS(String username, String password, int officeId, String label, int replyType) throws PException {
+    public static int invokeSetQuestionWS(String username, String password, int officeId, String label, int replyType) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setQuestion);
         int result = 0;
@@ -2930,16 +2927,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static boolean invokeDeleteQuestionWS(String username, String password, int officeId, int questionId) throws PException {
+    public static boolean invokeDeleteQuestionWS(String username, String password, int officeId, int questionId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteQuestion);
         boolean result = false;
@@ -2960,18 +2957,18 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
 
-    public static ArrayList<Question> invokeGetQuestionsWS(String username, String password, Integer officeId) throws PException {
+    public static ArrayList<Question> invokeGetQuestionsWS(String username, String password, Integer officeId) throws MyException {
 
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
 
         String webMethName = Util.getStringWS(R.string.ws_getQuestion);
@@ -3001,16 +2998,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return questions;
     }
 
-    public static boolean invokeSetReplyBatchWS(String username, String password, int officeId, int[] questionId, String[] reply) throws PException {
+    public static boolean invokeSetReplyBatchWS(String username, String password, int officeId, int[] questionId, String[] reply) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setReplyBatch);
         boolean result = false;
@@ -3040,16 +3037,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static boolean invokeSetReplyBatchForUserWS(String username, String password, int officeId, String patientUsername, int[] questionId, String[] reply) throws PException {
+    public static boolean invokeSetReplyBatchForUserWS(String username, String password, int officeId, String patientUsername, int[] questionId, String[] reply) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setReplyBatchForUser);
         boolean result = false;
@@ -3080,16 +3077,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Reply> invokeGetReplyWS(String username, String password, int officeId, String patientUsername) throws PException {
+    public static ArrayList<Reply> invokeGetReplyWS(String username, String password, int officeId, String patientUsername) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getReply);
         Reply reply = null;
@@ -3116,24 +3113,24 @@ public class WebService {
                     reply.setId(Integer.valueOf(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
                     reply.setUserId(Integer.valueOf(obj.getProperty(Util.getStringWS(R.string.ws_userId)).toString()));
                     reply.setQuestionId(Integer.valueOf(obj.getProperty(Util.getStringWS(R.string.ws_questionId)).toString()));
-                    reply.setReply(obj.getProperty(Util.getStringWS(R.string.ws_reply)).toString());
+                    reply.setReply(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_reply))));
                     replies.add(reply);
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return replies;
     }
 
-    public static String invokeAddOfficeForUserWS(String username, String password, int officeId) throws PException {
+    public static String invokeAddOfficeForUserWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_addOfficeForUser);
-        String result = null;
+        String result = "";
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         PropertyInfo property = new PropertyInfo();
@@ -3151,23 +3148,23 @@ public class WebService {
             result = String.valueOf(response.toString());
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
             if (result == null) {
-                throw new PException(nothingFromServer);
+                throw new MyException(nothingFromServer);
             } else {
-                throw new PException(otherMessage);
+                throw new MyException(otherMessage);
             }
         }
         return result;
     }
 
-    public static String invokeDeleteOfficeForUserWS(String username, String password, int officeId) throws PException {
+    public static String invokeDeleteOfficeForUserWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteOfficeForUser);
-        String result = null;
+        String result = "";
         SoapObject request = new SoapObject(NAMESPACE, webMethName);
 
         PropertyInfo property = new PropertyInfo();
@@ -3184,16 +3181,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = String.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static int invokeGetRoleInOfficeWS(String username, String password, int officeId) throws PException {
+    public static int invokeGetRoleInOfficeWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getRoleInOffice);
         int result = 0;
@@ -3213,16 +3210,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Integer.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static PaymentInfo getRequestNumber(String username, String password, int amount) throws PException {
+    public static PaymentInfo getRequestNumber(String username, String password, int amount) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setResNum);
         int result = 0;
@@ -3247,17 +3244,17 @@ public class WebService {
             paymentInfo.setMid(Integer.valueOf(response.getProperty(Util.getStringWS(R.string.ws_mid)).toString()));
             paymentInfo.setResNum(Integer.parseInt(response.getProperty(Util.getStringWS(R.string.ws_resNum)).toString()));
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return paymentInfo;
     }
 
-    public static String ForegetPasswordWS(String username) throws PException {
+    public static String ForegetPasswordWS(String username) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_forgetPassword);
         String result = null;
@@ -3275,16 +3272,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = String.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String verifySecurityCodeWS(String username, String password) throws PException {
+    public static String verifySecurityCodeWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_verifyActivationCode);
         String result = null;
@@ -3303,16 +3300,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = String.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static String changePasswordWS(String username, String password) throws PException {
+    public static String changePasswordWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_changePassword);
         String result = null;
@@ -3331,16 +3328,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = String.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static VersionInfo getVersionInfo(String versionCode, String password) throws PException {
+    public static VersionInfo getVersionInfo(String versionCode, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getVersionName);
         VersionInfo versionInfo = null;
@@ -3365,18 +3362,18 @@ public class WebService {
                 versionInfo.setForce(Boolean.valueOf(response.getProperty(Util.getStringWS(R.string.ws_forceInstall)).toString()));
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return versionInfo;
     }
 
     public static Assistant setAssistantWS(String username, String password
-            , int officeId, String assistantUsername, int taskGroupId) throws PException {
+            , int officeId, String assistantUsername, int taskGroupId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setBarber);
         Assistant assistant = null;
@@ -3407,17 +3404,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return assistant;
     }
 
     public static boolean deleteAssistantWS(String username, String password
-            , int officeId, int assistantId) throws PException {
+            , int officeId, int assistantId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteBarber);
         boolean result = false;
@@ -3437,16 +3434,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<Assistant> getAssistantOfficeWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<Assistant> getAssistantOfficeWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getBarberOffice);
         Assistant assistant = null;
@@ -3481,17 +3478,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return assistants;
     }
 
     public static ArrayList<Integer> setAssistantTimeWS(String username, String password
-            , int officeId, String assistantUsername, int taskGroupId, String date, int hour, int minute, int duration) throws PException {
+            , int officeId, String assistantUsername, int taskGroupId, String date, int hour, int minute, int duration) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_setBarberTime);
         ArrayList<Integer> result = null;
@@ -3523,17 +3520,17 @@ public class WebService {
             }
 
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
     public static boolean removeAssistantTimeWS(String username, String password
-            , int officeId, int assistantId) throws PException {
+            , int officeId, int assistantId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_deleteBarberTime);
         boolean result = false;
@@ -3553,16 +3550,16 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = Boolean.valueOf(response.toString());
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return result;
     }
 
-    public static ArrayList<AssistantTiming> getAssistantTimeListWS(String username, String password, int officeId, int assistantId) throws PException {
+    public static ArrayList<AssistantTiming> getAssistantTimeListWS(String username, String password, int officeId, int assistantId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getBarberOfficeTime);
         AssistantTiming timing = null;
@@ -3597,16 +3594,16 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return timings;
     }
 
-    public static ArrayList<Assistant> getAssistantOfficeTaskWS(String username, String password, int officeId, int turnId, int taskGroupId) throws PException {
+    public static ArrayList<Assistant> getAssistantOfficeTaskWS(String username, String password, int officeId, int turnId, int taskGroupId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String webMethName = Util.getStringWS(R.string.ws_getBarberOfficeTask);
         Assistant assistant = null;
@@ -3635,25 +3632,25 @@ public class WebService {
                         if (assistant.getErrorCode() != -1) {
                             assistant.setId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_id)).toString()));
                             assistant.setTaskGroupId(Integer.parseInt(obj.getProperty(Util.getStringWS(R.string.ws_taskGroupId)).toString()));
-                            assistant.setName(obj.getProperty(Util.getStringWS(R.string.ws_name)).toString());
-                            assistant.setFamily(obj.getProperty(Util.getStringWS(R.string.ws_lastname)).toString());
-                            assistant.setUsername(obj.getProperty(Util.getStringWS(R.string.ws_username)).toString());
+                            assistant.setName(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_name))));
+                            assistant.setFamily(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_lastname))));
+                            assistant.setUsername(getPropertyValue(obj.getProperty(Util.getStringWS(R.string.ws_username))));
                         }
                         assistants.add(assistant);
                     }
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
         return assistants;
     }
 
-    public static ArrayList<PatientAssistant> invokeGetTodayPatientAssistantWS(String username, String password, int officeId) throws PException {
+    public static ArrayList<PatientAssistant> invokeGetTodayPatientAssistantWS(String username, String password, int officeId) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         PatientAssistant patientInfo = null;
         ArrayList<PatientAssistant> patientInfos = new ArrayList<PatientAssistant>();
@@ -3686,17 +3683,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return patientInfos;
     }
 
-    public static ArrayList<PatientAssistant> invokeGetPatientAssistantWS(String username, String password, int officeId, String date) throws PException {
+    public static ArrayList<PatientAssistant> invokeGetPatientAssistantWS(String username, String password, int officeId, String date) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         PatientAssistant patientInfo = null;
         ArrayList<PatientAssistant> patientInfos = new ArrayList<PatientAssistant>();
@@ -3730,16 +3727,17 @@ public class WebService {
                 }
             }
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return patientInfos;
     }
-    public static String sendActivationCodeWS(String username, String password) throws PException {
+
+    public static String sendActivationCodeWS(String username, String password) throws MyException {
         if (!G.isOnline()) {
-            throw new PException(isOnlineMessage);
+            throw new MyException(isOnlineMessage);
         }
         String result = null;
         String webMethName = Util.getStringWS(R.string.ws_sendActivationCode);
@@ -3757,11 +3755,69 @@ public class WebService {
             SoapPrimitive response = (SoapPrimitive) envelope.getResponse();
             result = response.toString();
         } catch (ConnectException ex) {
-            throw new PException(connectMessage);
+            throw new MyException(connectMessage);
         } catch (Exception ex) {
-            throw new PException(otherMessage);
+            throw new MyException(otherMessage);
         }
 
         return result;
     }
+
+    public static ArrayList<Office> invokeGetOfficeForAllWS(String username, String password) throws MyException {
+        if (!G.isOnline()) {
+            throw new MyException(isOnlineMessage);
+        }
+        String webMethName = Util.getStringWS(R.string.ws_getOfficeForAll);
+        Office office = null;
+        ArrayList<Office> offices = new ArrayList<Office>();
+        SoapObject request = new SoapObject(NAMESPACE, webMethName);
+
+        request.addProperty(Util.getStringWS(R.string.ws_username), username);
+        request.addProperty(Util.getStringWS(R.string.ws_password), password);
+
+        SoapSerializationEnvelope envelope = new SoapSerializationEnvelope(SoapEnvelope.VER11);
+        envelope.setOutputSoapObject(request);
+        HttpTransportSE androidHttpTransportSE = new HttpTransportSE(URL);
+
+        try {
+            androidHttpTransportSE.call(SOAP_ACTION + webMethName, envelope);
+            SoapObject response_test = (SoapObject) envelope.getResponse();
+            SoapObject response = (SoapObject) envelope.bodyIn;
+            if (response_test != null) {
+                for (int i = 0; i < response.getPropertyCount(); i++) {
+                    SoapObject object = (SoapObject) response.getProperty(i);
+                    if (object != null) {
+                        office = new Office();
+                        office.setId(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_id)))));
+                        office.setDrUsername(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_doctorUsername))));
+                        office.setFirstname(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_doctorName))));
+                        office.setLastname(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_doctorLastName))));
+                        office.setCityId(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_cityId)))));
+                        office.setCityName(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_city))));
+                        office.setStateId(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_provinceId)))));
+                        office.setStateName(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_province))));
+                        office.setExpertId(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_specId)))));
+                        office.setExpertName(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_spec))));
+                        office.setSubExpertId(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_subspecId)))));
+                        office.setSubExpertName(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_subSpec))));
+                        office.setAddress(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_address))));
+                        office.setPhone(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_tellNo))));
+                        office.setLatitude(Double.parseDouble(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_latitude)))));
+                        office.setLongitude(Double.parseDouble(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_longitude)))));
+                        office.setBiography(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_biograophy))));
+                        office.setTimeQuantum(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_timeQuantum)))));
+                        office.setRole(Integer.parseInt(getPropertyValue(object.getProperty(Util.getStringWS(R.string.ws_role)))));
+                        offices.add(office);
+                    }
+                }
+            }
+        } catch (ConnectException ex) {
+            throw new MyException(connectMessage);
+        } catch (Exception ex) {
+            throw new MyException(otherMessage);
+        }
+        return offices;
+    }
+
+
 }

@@ -6,10 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Environment;
+import android.provider.ContactsContract;
 
 import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.Expert;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.PhotoDesc;
 import com.example.doctorsbuilding.nav.MessageInfo;
 import com.example.doctorsbuilding.nav.R;
@@ -20,6 +23,7 @@ import com.example.doctorsbuilding.nav.Util.DbBitmapUtility;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 
 import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 /**
@@ -29,7 +33,7 @@ public class DatabaseAdapter {
 
     private static final int DATABASE_VERSION = 1;
     private static final int imageProfileId = 1;
-    private static final String DATABASE_NAME = "nav.sqlite";
+    private static final String DATABASE_NAME = "arayeshyar.db";
     ////////////////////////////////////////////////////////////////
     private static final String TABLE_STATE = "tbl_state";
     private static final String STATE_ID = "id";
@@ -70,7 +74,8 @@ public class DatabaseAdapter {
     ////////////////////////////////////////////////////////////////////
     private static final String TABLE_OFFICE = "tbl_office";
     private static final String OFFICE_INS_ORDER = "ins";
-    private static final String OFFICE_IS_MY_OFFICE = "isMyOffice";
+    private static final String OFFICE_DEFAULT = "defaultOffice";
+    private static final String OFFICE_ROLE = "roleInOffice";
     private static final String OFFICE_ID = "id";
     private static final String OFFICE_NAME = "name";
     private static final String OFFICE_LASTNAME = "lastname";
@@ -89,7 +94,7 @@ public class DatabaseAdapter {
         this.context = context;
     }
 
-    public void initialize() {
+    public void initialize() throws MyException {
 
         try {
             File file = new File(path);
@@ -129,7 +134,8 @@ public class DatabaseAdapter {
         String create_tbl_office = "create table if not exists "
                 + TABLE_OFFICE + " ( "
                 + OFFICE_INS_ORDER + " integer not null, "
-                + OFFICE_IS_MY_OFFICE + " integer not null, "
+                + OFFICE_DEFAULT + " integer not null, "
+                + OFFICE_ROLE + " integer not null, "
                 + OFFICE_ID + " integer not null, "
                 + OFFICE_NAME + " nvarchar(50) not null, "
                 + OFFICE_LASTNAME + " nvarchar(50) not null, "
@@ -150,12 +156,12 @@ public class DatabaseAdapter {
             database.execSQL(create_tbl_message);
             database.execSQL(create_tbl_office);
         } catch (Exception ex) {
-            new MessageBox(context, "ایجاد پایگاه داده با مشکل مواجه شده است !!!").show();
+            throw new MyException("ایجاد پایگاه داده با مشکل مواجه شده است !!!");
         }
 
     }
 
-    public void update() {
+    public void update() throws MyException {
         try {
             database.execSQL("drop table if exists " + TABLE_IMAGE);
             database.execSQL("drop table if exists " + TABLE_STATE);
@@ -168,31 +174,33 @@ public class DatabaseAdapter {
             initialize();
 
         } catch (Exception ex) {
-            new MessageBox(context, "بروز رسانی پایگاه داده با مشکل مواجه شده است !!!").show();
+            throw new MyException("بروز رسانی پایگاه داده با مشکل مواجه شده است !!!");
         }
     }
 
-    public boolean openConnection() {
+    public boolean openConnection() throws MyException {
+        boolean res = true;
         try {
             this.database = SQLiteDatabase.openOrCreateDatabase(path + DATABASE_NAME, null);
         } catch (Exception ex) {
-            new MessageBox(context, "مشکلی در باز کردن کانکشن پایگاه داده بوجود آمده است !!!").show();
-            return false;
+            res = false;
+            throw new MyException("مشکلی در باز کردن کانکشن پایگاه داده بوجود آمده است !!!");
         }
-        return true;
+        return res;
     }
 
-    public boolean closeConnection() {
+    public boolean closeConnection() throws MyException {
+        boolean res = true;
         try {
             database.close();
         } catch (Exception ex) {
-            new MessageBox(context, "مشکلی در بستن کانکشن پایگاه داده بوجود آمده است !!!").show();
-            return false;
+            res = false;
+            throw new MyException("مشکلی در بستن کانکشن پایگاه داده بوجود آمده است !!!");
         }
-        return true;
+        return res;
     }
 
-    public long saveImageProfile(int id, byte[] image) {
+    public long saveImageProfile(int id, byte[] image) throws MyException {
         long result = -1;
         try {
             deleteImageProfile(imageProfileId);
@@ -202,12 +210,12 @@ public class DatabaseAdapter {
             result = database.insert(TABLE_IMAGE, null, cv);
             int x = 0;
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره کردن عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره کردن عکس با مشکل مواجه شده است !!!");
         }
         return result;
     }
 
-    public void updateImageProfile(int picId, byte[] image) {
+    public void updateImageProfile(int picId, byte[] image) throws MyException {
 
         try {
             deleteImageProfile(imageProfileId);
@@ -216,11 +224,11 @@ public class DatabaseAdapter {
             cv.put(IMAGE_DATA, image);
             database.update(TABLE_IMAGE, cv, IMAGE_ID + " = " + picId, null);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات بروز رسانی عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات بروز رسانی عکس با مشکل مواجه شده است !!!");
         }
     }
 
-    public Bitmap getImageProfile(int id) {
+    public Bitmap getImageProfile(int id) throws MyException {
         Bitmap imageProfile = null;
         try {
             String query = "select " + IMAGE_DATA + " from " + TABLE_IMAGE + " where " + IMAGE_ID + " = " + imageProfileId;
@@ -231,12 +239,12 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت عکس با مشکل مواجه شده است !!!");
         }
         return imageProfile;
     }
 
-    public long saveImageToGallery(int id, String date, String description, byte[] image) {
+    public long saveImageToGallery(int id, String date, String description, byte[] image) throws MyException {
         long result = -1;
         try {
             ContentValues cv = new ContentValues();
@@ -246,12 +254,12 @@ public class DatabaseAdapter {
             cv.put(GALLERY_DATA, image);
             result = database.insert(TABLE_GALLERY, null, cv);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره کردن عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره کردن عکس با مشکل مواجه شده است !!!");
         }
         return result;
     }
 
-    public PhotoDesc getImageFromGallery(int id) {
+    public PhotoDesc getImageFromGallery(int id) throws MyException {
         PhotoDesc gallery = null;
         try {
             String query = "select " + GALLERY_ID + " , " + GALLERY_DESCRIPTION + " , " + GALLERY_DATE + " , " + GALLERY_DATA + " from " +
@@ -268,34 +276,34 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت عکس با مشکل مواجه شده است !!!");
         }
         return gallery;
     }
 
-    public void deleteImageFromGallery(int id) {
+    public void deleteImageFromGallery(int id) throws MyException {
         try {
             String query = "delete from " + TABLE_GALLERY + " where " + GALLERY_ID + " = " + id;
             database.execSQL(query);
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف عکس با مشکل مواجه شده است !!!");
         }
 
     }
 
-    public void updateImageInGallery(int picId, String description) {
+    public void updateImageInGallery(int picId, String description) throws MyException {
 
         try {
             String query = "UPDATE " + TABLE_GALLERY + " SET " + GALLERY_DESCRIPTION + "  = '" + description + "' " +
                     "WHERE " + GALLERY_ID + " = " + picId;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات بروز رسانی عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات بروز رسانی عکس با مشکل مواجه شده است !!!");
         }
     }
 
-    public ArrayList<Integer> getImageIds() {
+    public ArrayList<Integer> getImageIds() throws MyException {
         ArrayList<Integer> imageIds = new ArrayList<Integer>();
         try {
             String query = "select " + GALLERY_ID + " from " + TABLE_GALLERY;
@@ -305,25 +313,32 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت شناسه عکس بامشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت شناسه عکس بامشکل مواجه شده است !!!");
         }
         return imageIds;
     }
 
-    private void deleteImageProfile(int id) {
-        Bitmap imgProfile = getImageProfile(imageProfileId);
+    private void deleteImageProfile(int id) throws MyException {
+
+        Bitmap imgProfile = null;
+        try {
+            imgProfile = getImageProfile(imageProfileId);
+        } catch (MyException ex) {
+            new MessageBox(context, ex.getMessage());
+        }
+
         try {
             if (imgProfile != null) {
                 String query = "delete from " + TABLE_IMAGE + " where " + IMAGE_ID + " = " + id;
                 database.execSQL(query);
             }
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف عکس با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف عکس با مشکل مواجه شده است !!!");
         }
 
     }
 
-    public long insertStates(ArrayList<State> states) {
+    public long insertStates(ArrayList<State> states) throws MyException {
         long id = -1;
         try {
             ContentValues values;
@@ -335,12 +350,12 @@ public class DatabaseAdapter {
             }
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره استان ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره استان ها با مشکل مواجه شده است !!!");
         }
         return id;
     }
 
-    public ArrayList<State> getStates() {
+    public ArrayList<State> getStates() throws MyException {
         State state = null;
         ArrayList<State> states = new ArrayList<State>();
         try {
@@ -354,21 +369,21 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت اسامی استان ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت اسامی استان ها با مشکل مواجه شده است !!!");
         }
         return states;
     }
 
-    public void deleteStates() {
+    public void deleteStates() throws MyException {
         try {
             String query = "delete from " + TABLE_STATE;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف استان ها با مشکل مواجه شد !!!");
+            throw new MyException("عملیات حذف استان ها با مشکل مواجه شد !!!");
         }
     }
 
-    public long insertCities(ArrayList<City> cities) {
+    public long insertCities(ArrayList<City> cities) throws MyException {
         long id = -1;
         try {
             ContentValues values;
@@ -381,12 +396,12 @@ public class DatabaseAdapter {
             }
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره شهر ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره شهر ها با مشکل مواجه شده است !!!");
         }
         return id;
     }
 
-    public ArrayList<City> getCities() {
+    public ArrayList<City> getCities() throws MyException {
         City city = null;
         ArrayList<City> cities = new ArrayList<City>();
         try {
@@ -401,21 +416,21 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت اسامی شهر ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت اسامی شهر ها با مشکل مواجه شده است !!!");
         }
         return cities;
     }
 
-    public void deleteCities() {
+    public void deleteCities() throws MyException {
         try {
             String query = "delete from " + TABLE_CITY;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف شهر ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف شهر ها با مشکل مواجه شده است !!!");
         }
     }
 
-    public long insertExperts(ArrayList<Expert> experts) {
+    public long insertExperts(ArrayList<Expert> experts) throws MyException {
         long id = -1;
         try {
             ContentValues cv;
@@ -426,12 +441,12 @@ public class DatabaseAdapter {
                 id = database.insert(TABLE_EXPERT, null, cv);
             }
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره تخصص ها با مشکل مواجه شده است !!!");
         }
         return id;
     }
 
-    public ArrayList<Expert> getExperts() {
+    public ArrayList<Expert> getExperts() throws MyException {
         Expert expert = null;
         ArrayList<Expert> experts = new ArrayList<Expert>();
         try {
@@ -445,21 +460,21 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت اسامی تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت اسامی تخصص ها با مشکل مواجه شده است !!!");
         }
         return experts;
     }
 
-    public void deleteExperts() {
+    public void deleteExperts() throws MyException {
         try {
             String query = "delete from " + TABLE_EXPERT;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف تخصص ها با مشکل مواجه شده است !!!");
         }
     }
 
-    public long insertSubExperts(ArrayList<SubExpert> subExperts) {
+    public long insertSubExperts(ArrayList<SubExpert> subExperts) throws MyException {
         long result = -1;
         try {
             ContentValues cv;
@@ -471,12 +486,12 @@ public class DatabaseAdapter {
                 result = database.insert(TABLE_SUB_EXPERT, null, cv);
             }
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره زیر تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره زیر تخصص ها با مشکل مواجه شده است !!!");
         }
         return result;
     }
 
-    public ArrayList<SubExpert> getSubExperts() {
+    public ArrayList<SubExpert> getSubExperts() throws MyException {
         SubExpert subExpert = null;
         ArrayList<SubExpert> subExperts = new ArrayList<SubExpert>();
         try {
@@ -491,21 +506,21 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت اسامی زیر تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت اسامی زیر تخصص ها با مشکل مواجه شده است !!!");
         }
         return subExperts;
     }
 
-    public void deleteSubExperts() {
+    public void deleteSubExperts() throws MyException {
         try {
             String query = "delete from " + TABLE_SUB_EXPERT;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف زیر تخصص ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف زیر تخصص ها با مشکل مواجه شده است !!!");
         }
     }
 
-    public long insertMessages(ArrayList<MessageInfo> messages) {
+    public long insertMessages(ArrayList<MessageInfo> messages) throws MyException {
         long result = -1;
         try {
             ContentValues cv = null;
@@ -522,12 +537,12 @@ public class DatabaseAdapter {
 
             }
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره پیام ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره پیام ها با مشکل مواجه شده است !!!");
         }
         return result;
     }
 
-    public ArrayList<MessageInfo> getMessages() {
+    public ArrayList<MessageInfo> getMessages() throws MyException {
         MessageInfo message = null;
         ArrayList<MessageInfo> messages = new ArrayList<MessageInfo>();
         try {
@@ -548,17 +563,17 @@ public class DatabaseAdapter {
             }
             cursor.close();
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت پیام ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات دریافت پیام ها با مشکل مواجه شده است !!!");
         }
         return messages;
     }
 
-    public void deleteMessages() {
+    public void deleteMessages() throws MyException {
         try {
             String query = "delete from " + TABLE_MESSAGE;
             database.execSQL(query);
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف پیام ها با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف پیام ها با مشکل مواجه شده است !!!");
         }
     }
 
@@ -569,150 +584,159 @@ public class DatabaseAdapter {
         return (int) stmt.simpleQueryForLong();
     }
 
-    public long insertoffice(Office office) {
-        long id = -1;
-        int insOrder = getMaxInsOrderInOffice() + 1;
-        try {
-            ContentValues values;
-            values = new ContentValues();
-            values.put(OFFICE_INS_ORDER, insOrder);
-            values.put(OFFICE_IS_MY_OFFICE, office.isMyOffice());
-            values.put(OFFICE_ID, office.getId());
-            values.put(OFFICE_NAME, office.getFirstname());
-            values.put(OFFICE_LASTNAME, office.getLastname());
-            values.put(OFFICE_EXPERT, office.getExpertName());
-            values.put(OFFICE_SUBEXPERT, office.getSubExpertName());
-            values.put(OFFICE_ADDRESS, office.getAddress());
-            values.put(OFFICE_PHONE, office.getPhone());
-            values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(office.getPhoto()));
-            id = database.insert(TABLE_OFFICE, null, values);
-
-        } catch (Exception ex) {
-            new MessageBox(context, "عملیات ذخیره آرایشگاه با مشکل مواجه شده است !!!").show();
-        }
-        return id;
-    }
-
-    public ArrayList<Office> getoffices() {
-        Office office = null;
-        ArrayList<Office> offices = new ArrayList<Office>();
-        try {
-            String query = "select * from " + TABLE_OFFICE + " order by " + OFFICE_INS_ORDER;
-            Cursor cursor = database.rawQuery(query, null);
-            while (cursor.moveToNext()) {
-                office = new Office();
-                office.setId(cursor.getInt(cursor.getColumnIndex(OFFICE_ID)));
-                office.setFirstname(cursor.getString(cursor.getColumnIndex(OFFICE_NAME)));
-                office.setLastname(cursor.getString(cursor.getColumnIndex(OFFICE_LASTNAME)));
-                office.setExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_EXPERT)));
-                office.setSubExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_SUBEXPERT)));
-                office.setAddress(cursor.getString(cursor.getColumnIndex(OFFICE_ADDRESS)));
-                office.setPhone(cursor.getString(cursor.getColumnIndex(OFFICE_PHONE)));
-                byte[] image = cursor.getBlob(cursor.getColumnIndex(OFFICE_PHOTO));
-                office.setPhoto(DbBitmapUtility.getImage(image));
-                offices.add(office);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت آرایشگاه ها با مشکل مواجه شده است !").show();
-        }
-        return offices;
-    }
-
-    public ArrayList<Office> getMyOffice() {
-        Office office = null;
-        ArrayList<Office> offices = new ArrayList<Office>();
-        try {
-            String query = "select * from " + TABLE_OFFICE + " where " + OFFICE_IS_MY_OFFICE + " = 1 order by " + OFFICE_INS_ORDER;
-            Cursor cursor = database.rawQuery(query, null);
-            while (cursor.moveToNext()) {
-                office = new Office();
-                office.setId(cursor.getInt(cursor.getColumnIndex(OFFICE_ID)));
-                office.setFirstname(cursor.getString(cursor.getColumnIndex(OFFICE_NAME)));
-                office.setLastname(cursor.getString(cursor.getColumnIndex(OFFICE_LASTNAME)));
-                office.setExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_EXPERT)));
-                office.setSubExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_SUBEXPERT)));
-                office.setAddress(cursor.getString(cursor.getColumnIndex(OFFICE_ADDRESS)));
-                office.setPhone(cursor.getString(cursor.getColumnIndex(OFFICE_PHONE)));
-                byte[] image = cursor.getBlob(cursor.getColumnIndex(OFFICE_PHOTO));
-                office.setPhoto(DbBitmapUtility.getImage(image));
-                offices.add(office);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت آرایشگاه ها با مشکل مواجه شده است !").show();
-        }
-        return offices;
-    }
-
-    public ArrayList<Office> getMyDoctorOffice() {
-        Office office = null;
-        ArrayList<Office> offices = new ArrayList<Office>();
-        try {
-            String query = "select * from " + TABLE_OFFICE + " where " + OFFICE_IS_MY_OFFICE + " = 0 order by " + OFFICE_INS_ORDER;
-            Cursor cursor = database.rawQuery(query, null);
-            while (cursor.moveToNext()) {
-                office = new Office();
-                office.setId(cursor.getInt(cursor.getColumnIndex(OFFICE_ID)));
-                office.setFirstname(cursor.getString(cursor.getColumnIndex(OFFICE_NAME)));
-                office.setLastname(cursor.getString(cursor.getColumnIndex(OFFICE_LASTNAME)));
-                office.setExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_EXPERT)));
-                office.setSubExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_SUBEXPERT)));
-                office.setAddress(cursor.getString(cursor.getColumnIndex(OFFICE_ADDRESS)));
-                office.setPhone(cursor.getString(cursor.getColumnIndex(OFFICE_PHONE)));
-                byte[] image = cursor.getBlob(cursor.getColumnIndex(OFFICE_PHOTO));
-                office.setPhoto(DbBitmapUtility.getImage(image));
-                offices.add(office);
-            }
-            cursor.close();
-        } catch (Exception ex) {
-            new MessageBox(context, "عملیات دریافت آرایشگاه ها با مشکل مواجه شده است !").show();
-        }
-        return offices;
-    }
-
-    public void deleteOffice(int officeId) {
+    public void deleteOffice(int officeId) throws MyException {
         try {
             String query = "delete from " + TABLE_OFFICE + " where " + OFFICE_ID + " = " + officeId;
             database.execSQL(query);
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف آرایشگاه با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف آرایشگاه با مشکل مواجه شده است !!!");
         }
 
     }
 
-    public void updateOffice(int officeId, Office office) {
+    public void deleteAllOffice() throws MyException {
+        try {
+            String query = "delete from " + TABLE_OFFICE;
+            database.execSQL(query);
 
+        } catch (Exception ex) {
+            throw new MyException("عملیات حذف آرایشگاه با مشکل مواجه شده است !!!");
+        }
+
+    }
+
+    public void deleteAllGalleryPic() throws MyException {
+        try {
+            String query = "delete from " + TABLE_GALLERY;
+            database.execSQL(query);
+
+        } catch (Exception ex) {
+            throw new MyException("عملیات حذف آرایشگاه با مشکل مواجه شده است !!!");
+        }
+
+    }
+
+    public ArrayList<Office> getOfficeInfo() throws MyException {
+        Office office = null;
+        ArrayList<Office> offices = new ArrayList<Office>();
+        try {
+            String query = "select * from " + TABLE_OFFICE + " order by " + OFFICE_ROLE;
+            Cursor cursor = database.rawQuery(query, null);
+            while (cursor.moveToNext()) {
+                office = new Office();
+                office.setId(cursor.getInt(cursor.getColumnIndex(OFFICE_ID)));
+                office.setIsDefault(cursor.getInt(cursor.getColumnIndex(OFFICE_DEFAULT)));
+                office.setRole(cursor.getInt(cursor.getColumnIndex(OFFICE_ROLE)));
+                office.setFirstname(cursor.getString(cursor.getColumnIndex(OFFICE_NAME)));
+                office.setLastname(cursor.getString(cursor.getColumnIndex(OFFICE_LASTNAME)));
+                office.setExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_EXPERT)));
+                office.setSubExpertName(cursor.getString(cursor.getColumnIndex(OFFICE_SUBEXPERT)));
+                office.setAddress(cursor.getString(cursor.getColumnIndex(OFFICE_ADDRESS)));
+                office.setPhone(cursor.getString(cursor.getColumnIndex(OFFICE_PHONE)));
+                byte[] image = cursor.getBlob(cursor.getColumnIndex(OFFICE_PHOTO));
+                office.setPhoto(DbBitmapUtility.getImage(image));
+                offices.add(office);
+            }
+            cursor.close();
+        } catch (Exception ex) {
+            throw new MyException("عملیات دریافت آرایشگاه ها با مشکل مواجه شده است !");
+        }
+        return offices;
+    }
+
+    public void insertOfficeInfo(ArrayList<Office> offices) throws MyException {
+        for (int i = 0; i < offices.size(); i++) {
+            Office office = offices.get(i);
+            int insOrder = getMaxInsOrderInOffice() + 1;
+            try {
+                ContentValues values;
+                values = new ContentValues();
+                values.put(OFFICE_INS_ORDER, insOrder);
+                values.put(OFFICE_DEFAULT, office.getIsDefault());
+                values.put(OFFICE_ROLE, office.getRole());
+                values.put(OFFICE_ID, office.getId());
+                values.put(OFFICE_NAME, office.getFirstname());
+                values.put(OFFICE_LASTNAME, office.getLastname());
+                values.put(OFFICE_EXPERT, office.getExpertName());
+                values.put(OFFICE_SUBEXPERT, office.getSubExpertName());
+                values.put(OFFICE_ADDRESS, office.getAddress());
+                values.put(OFFICE_PHONE, office.getPhone());
+                if (office.getPhoto() != null)
+                    values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(office.getPhoto()));
+                else
+                    values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(
+                            BitmapFactory.decodeResource(context.getResources(), R.mipmap.doctor_temp)));
+                long res = database.insert(TABLE_OFFICE, null, values);
+
+            } catch (Exception ex) {
+                throw new MyException("عملیات ذخیره آرایشگاه با مشکل مواجه شده است !!!");
+            }
+        }
+    }
+
+    public void insertOfficeInfo2(Office office) throws MyException {
+        int insOrder = getMaxInsOrderInOffice() + 1;
         try {
             ContentValues values;
             values = new ContentValues();
+            values.put(OFFICE_INS_ORDER, insOrder);
+            values.put(OFFICE_DEFAULT, office.getIsDefault());
+            values.put(OFFICE_ROLE, office.getRole());
             values.put(OFFICE_ID, office.getId());
-            values.put(OFFICE_IS_MY_OFFICE, office.isMyOffice());
             values.put(OFFICE_NAME, office.getFirstname());
             values.put(OFFICE_LASTNAME, office.getLastname());
             values.put(OFFICE_EXPERT, office.getExpertName());
             values.put(OFFICE_SUBEXPERT, office.getSubExpertName());
             values.put(OFFICE_ADDRESS, office.getAddress());
             values.put(OFFICE_PHONE, office.getPhone());
-            values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(office.getPhoto()));
-            database.update(TABLE_OFFICE, values, OFFICE_ID + "=" + officeId, null);
+            if (office.getPhoto() != null)
+                values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(office.getPhoto()));
+            else
+                values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(
+                        BitmapFactory.decodeResource(context.getResources(), R.mipmap.doctor_temp)));
+            database.insert(TABLE_OFFICE, null, values);
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات بروز رسانی آرایشگاه با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات ذخیره آرایشگاه با مشکل مواجه شده است !!!");
+        }
+    }
+
+    public void updateOfficeInfo(Office office) throws MyException {
+
+        try {
+            ContentValues values;
+            values = new ContentValues();
+            values.put(OFFICE_DEFAULT, office.getIsDefault());
+            values.put(OFFICE_ROLE, office.getRole());
+            values.put(OFFICE_ID, office.getId());
+            values.put(OFFICE_NAME, office.getFirstname());
+            values.put(OFFICE_LASTNAME, office.getLastname());
+            values.put(OFFICE_EXPERT, office.getExpertName());
+            values.put(OFFICE_SUBEXPERT, office.getSubExpertName());
+            values.put(OFFICE_ADDRESS, office.getAddress());
+            values.put(OFFICE_PHONE, office.getPhone());
+            if (office.getPhoto() != null)
+                values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(office.getPhoto()));
+            else
+                values.put(OFFICE_PHOTO, DbBitmapUtility.getBytes(
+                        BitmapFactory.decodeResource(context.getResources(), R.mipmap.doctor_temp)));
+            database.update(TABLE_OFFICE, values, OFFICE_ID + "=" + office.getId(), null);
+
+        } catch (Exception ex) {
+            throw new MyException("عملیات بروز رسانی آرایشگاه با مشکل مواجه شده است !!!");
         }
 
     }
 
-    public void deleteAllOffice() {
+    public void deleteOfficeInfo(int officeId) throws MyException {
         try {
-            String query = "delete from " + TABLE_OFFICE;
+            String query = "delete from " + TABLE_OFFICE + " where " + OFFICE_ID + " = " + officeId;
             database.execSQL(query);
 
         } catch (Exception ex) {
-            new MessageBox(context, "عملیات حذف آرایشگاه با مشکل مواجه شده است !!!").show();
+            throw new MyException("عملیات حذف آرایشگاه با مشکل مواجه شده است !!!");
         }
 
     }
-
 }

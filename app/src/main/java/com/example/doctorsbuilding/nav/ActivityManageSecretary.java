@@ -1,13 +1,10 @@
 package com.example.doctorsbuilding.nav;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.media.MediaRouter;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -29,7 +26,6 @@ import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
-import java.sql.Array;
 import java.util.ArrayList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -60,7 +56,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityManageSecretary.this);
+        Util.setStatusBarColor(ActivityManageSecretary.this);
         setContentView(R.layout.activity_manage_secretary);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -100,7 +96,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
         btn_refresh = (ImageView) findViewById(R.id.manage_secretary_refresh);
         lock_pan = (FrameLayout) findViewById(R.id.manage_secretary_framLayout);
         mListview = (ListView) findViewById(R.id.manage_secretary_listView);
-        pageTitle = (TextView)findViewById(R.id.toolbar_title);
+        pageTitle = (TextView) findViewById(R.id.toolbar_title);
         pageTitle.setText("مدیریت منشی");
         backBtn = (ImageButton) findViewById(R.id.toolbar_backBtn);
         secretaries = new ArrayList<User>();
@@ -153,7 +149,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
             new MessageBox(ActivityManageSecretary.this, "لطفا شماره تلفن همراه منشی را وارد نمایید.").show();
             return false;
         }
-        if (!Util.IsValidCodeMeli(txt_username.getText().toString().trim())) {
+        if (txt_username.getText().toString().trim().length() != 11) {
             new MessageBox(ActivityManageSecretary.this, "شماره تلفن همراه وارد شده نادرست می باشد.").show();
             return false;
         }
@@ -195,8 +191,8 @@ public class ActivityManageSecretary extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                secretaries = WebService.invokeGetSecretaryInfoWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                secretaries = WebService.invokeGetSecretaryInfoWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -230,7 +226,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            dialog = ProgressDialog.show(ActivityManageSecretary.this,"", "در حال افزودن منشی ...");
+            dialog = ProgressDialog.show(ActivityManageSecretary.this, "", "در حال افزودن منشی ...");
             dialog.getWindow().setGravity(Gravity.END);
             dialog.setCancelable(true);
             btn_add.setClickable(false);
@@ -241,9 +237,9 @@ public class ActivityManageSecretary extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeAddSecretaryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, secretary_username);
+                result = WebService.invokeAddSecretaryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), secretary_username);
 
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -265,7 +261,7 @@ public class ActivityManageSecretary extends AppCompatActivity {
                     dialog.dismiss();
                 } else {
                     dialog.dismiss();
-                    new MessageBox(ActivityManageSecretary.this, "نام کاربری وارد شده مجاز نیست .").show();
+                    new MessageBox(ActivityManageSecretary.this, "شماره تلفن همراه وارد شده نادرست می باشد.").show();
                 }
             }
             btn_add.setClickable(true);
@@ -294,9 +290,9 @@ public class ActivityManageSecretary extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeRemoveSecretaryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, secretary_username);
+                result = WebService.invokeRemoveSecretaryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), secretary_username);
 
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

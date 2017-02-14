@@ -1,6 +1,5 @@
 package com.example.doctorsbuilding.nav.Question;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -9,7 +8,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Html;
 import android.text.Spanned;
-import android.text.method.LinkMovementMethod;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -28,17 +26,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
-import com.example.doctorsbuilding.nav.PatientFile;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.TextViewLinkHandler;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.List;
-import java.util.Map;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -72,7 +67,7 @@ public class ActivityCreateQuestion extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityCreateQuestion.this);
+        Util.setStatusBarColor(ActivityCreateQuestion.this);
         setContentView(R.layout.activity_question);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -217,8 +212,8 @@ public class ActivityCreateQuestion extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeSetQuestionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, label, replyType);
-            } catch (PException ex) {
+                result = WebService.invokeSetQuestionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), label, replyType);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -236,7 +231,7 @@ public class ActivityCreateQuestion extends AppCompatActivity {
                     Question question = new Question();
                     question.setId(result);
                     question.setLabel(txt_topic.getText().toString().trim());
-                    question.setOfficeId(G.officeId);
+                    question.setOfficeId(G.officeInfo.getId());
                     question.setReplyType(rb_Selection.isChecked() ? ReplyType.selection.ordinal() : ReplyType.text.ordinal());
                     mAdapter.add(question);
                     Toast.makeText(ActivityCreateQuestion.this, "ثبت با موفقیت انجام شده است .", Toast.LENGTH_SHORT).show();
@@ -269,8 +264,8 @@ public class ActivityCreateQuestion extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeDeleteQuestionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, questionId);
-            } catch (PException ex) {
+                result = WebService.invokeDeleteQuestionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), questionId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -290,7 +285,7 @@ public class ActivityCreateQuestion extends AppCompatActivity {
                     afterRefreshButtonClicked();
                 } else {
                     dialog.dismiss();
-                    new MessageBox(ActivityCreateQuestion.this, "خطایی در عملیات حذف رخ داده است .").show();
+                    new MessageBox(ActivityCreateQuestion.this, "به علت پاسخ دهی مشتریان به این سوال، مجاز به حذف این سوال نمی باشید.").show();
                 }
             }
             btn_delete.setClickable(true);
@@ -315,8 +310,8 @@ public class ActivityCreateQuestion extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

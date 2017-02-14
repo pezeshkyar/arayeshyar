@@ -61,7 +61,7 @@ public class CustomListViewAssistantsTiming extends BaseAdapter {
         rowView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(context, "click item", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(context, "click item", Toast.LENGTH_SHORT).show();
             }
         });
         return rowView;

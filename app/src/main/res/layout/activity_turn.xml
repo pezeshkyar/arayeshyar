@@ -16,7 +16,7 @@
         android:checked="true" />
 
     <TextView
-        android:id="@+id/addTurn_chbox_textDr"
+        android:id="@+id/addTurn_chbox_drTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/addTurn_chbox"
@@ -27,7 +27,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/addTurn_chbox_textUser"
+        android:id="@+id/addTurn_chbox_userTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/addTurn_chbox"
@@ -60,14 +60,14 @@
         android:inAnimation="@android:anim/slide_in_left">
 
         <LinearLayout
-            android:id="@+id/addTurn_member_view"
+            android:id="@+id/addTurn_searchPage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="20dp"
             android:orientation="vertical">
 
             <EditText
-                android:id="@+id/addTurn_member_username"
+                android:id="@+id/addTurn_search_username"
                 android:inputType="text|textNoSuggestions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -78,7 +78,7 @@
                 android:textColor="@color/textColor" />
 
             <EditText
-                android:id="@+id/addTurn_member_name"
+                android:id="@+id/addTurn_search_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -89,7 +89,7 @@
                 android:textColor="@color/textColor" />
 
             <EditText
-                android:id="@+id/addTurn_member_family"
+                android:id="@+id/addTurn_search_lastname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -99,21 +99,8 @@
                 android:padding="8dp"
                 android:textColor="@color/textColor" />
 
-            <EditText
-                android:id="@+id/addTurn_member_mobile"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="20dp"
-                android:inputType="number|textNoSuggestions"
-                android:background="@drawable/my_edit_text"
-                android:hint="شماره موبایل"
-                android:digits="0123456789"
-                android:maxLength="11"
-                android:padding="8dp"
-                android:textColor="@color/textColor" />
-
             <Button
-                android:id="@+id/addTurn_member_btnSearch"
+                android:id="@+id/addTurn_btnSearch"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -133,14 +120,13 @@
 
 
         <LinearLayout
-            android:id="@+id/addTurn_nonMembers_view"
             android:layout_width="match_parent"
             android:layout_marginTop="20dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
 
             <EditText
-                android:id="@+id/addTurn_nonMember_name"
+                android:id="@+id/addTurn_guest_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -151,7 +137,7 @@
                 android:textColor="@color/textColor" />
 
             <EditText
-                android:id="@+id/addTurn_nonMember_family"
+                android:id="@+id/addTurn_guest_lastname"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -162,7 +148,7 @@
                 android:textColor="@color/textColor" />
 
             <EditText
-                android:id="@+id/addTurn_nonMember_mobile"
+                android:id="@+id/addTurn_guest_mobile"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
@@ -174,17 +160,7 @@
                 android:textColor="@color/textColor" />
 
             <Button
-                android:id="@+id/addTurn_nonMember_searchBtn"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/my_button"
-                android:text="جستجو"
-                android:textColor="@android:color/white"
-                android:visibility="gone" />
-
-            <Button
-                android:id="@+id/addTurn_nonMember_insertBtn"
+                android:id="@+id/addTurn_guest_btnNext"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -203,7 +179,7 @@
             android:padding="10dp">
 
             <TextView
-                android:id="@+id/addTask_patient_name"
+                android:id="@+id/addTurn_patientName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -213,7 +189,7 @@
                 android:textColor="@color/textColor" />
 
             <Spinner
-                android:id="@+id/addTask_task"
+                android:id="@+id/addTurn_spinner_taskGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -222,7 +198,7 @@
             </Spinner>
 
             <Spinner
-                android:id="@+id/addTask_subtask"
+                android:id="@+id/addTurn_spinner_task"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -231,7 +207,7 @@
             </Spinner>
 
             <Spinner
-                android:id="@+id/addTask_assistant"
+                android:id="@+id/addTurn_spinner_assistant"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -240,7 +216,7 @@
             </Spinner>
 
             <TextView
-                android:id="@+id/addTask_price"
+                android:id="@+id/addTurn_taskPrice"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="10dp"
@@ -248,7 +224,7 @@
                 android:padding="8dp"
                 android:textColor="@color/textColor" />
             <Button
-                android:id="@+id/addTask_addBtn"
+                android:id="@+id/addTurn_btnAddTurn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"

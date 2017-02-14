@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -23,7 +22,6 @@ import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -35,14 +33,14 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
 import com.example.doctorsbuilding.nav.Util.DbBitmapUtility;
-import com.example.doctorsbuilding.nav.Util.ImageCompressor;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
+import com.example.doctorsbuilding.nav.Util.compressor.Compressor;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -81,7 +79,7 @@ public class gallery2 extends Activity {
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
 //            mode.setTitle("Options");
-            mode.getMenuInflater().inflate(R.menu.popup_menu, menu);
+            mode.getMenuInflater().inflate(R.menu.popup_menu_gallery, menu);
             return true;
         }
 
@@ -141,7 +139,7 @@ public class gallery2 extends Activity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        G.setStatusBarColor(gallery2.this);
+        Util.setStatusBarColor(gallery2.this);
         setContentView(R.layout.activity_gallery2);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         initViews();
@@ -183,14 +181,14 @@ public class gallery2 extends Activity {
         aboutPic = (EditText) findViewById(R.id.gallery2_about);
         editPic = (ImageView) findViewById(R.id.gallery2_apply_edit);
         insertPic = (ImageView) findViewById(R.id.gallery2_apply_image);
-        pageTitle = (TextView)findViewById(R.id.toolbar_title);
+        pageTitle = (TextView) findViewById(R.id.toolbar_title);
         pageTitle.setText("گالری عکس");
         backBtn = (ImageButton) findViewById(R.id.toolbar_backBtn);
         loading_progress = (ProgressBar) findViewById(R.id.loading_progress);
         mListView.setDivider(null);
         mListView.setDividerHeight(0);
         RelativeLayout rl = (RelativeLayout) findViewById(R.id.gallery2_insert_layout);
-        if (G.UserInfo.getRole() != UserType.Dr.ordinal() && G.UserInfo.getRole() != UserType.secretary.ordinal()) {
+        if (G.officeInfo.getRole() != UserType.Dr.ordinal() && G.officeInfo.getRole() != UserType.secretary.ordinal()) {
             rl.setVisibility(View.GONE);
         }
         database = new DatabaseAdapter(gallery2.this);
@@ -204,7 +202,7 @@ public class gallery2 extends Activity {
     private void eventListener() {
         mListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             public boolean onItemLongClick(AdapterView parent, View view, int position, long id) {
-                if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
+                if (G.officeInfo.getRole() == UserType.Dr.ordinal() || G.officeInfo.getRole() == UserType.secretary.ordinal()) {
                     if (cabMode != null) {
                         return false;
                     }
@@ -357,9 +355,6 @@ public class gallery2 extends Activity {
                         int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
                         Bitmap scaled = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
 
-//                        ImageCompressor img = new ImageCompressor();
-//                        img.compressImage(data.getDataString());
-//                        int x = 0;
                         asyncSetPic = new asyncSetGalleryPic(scaled, aboutPic.getText().toString());
                         asyncSetPic.execute();
 
@@ -450,8 +445,8 @@ public class gallery2 extends Activity {
         protected Void doInBackground(String... strings) {
             try {
                 id = WebService.invokeSetGalleryPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(),
-                        G.officeId, photo, description);
-            } catch (PException ex) {
+                        G.officeInfo.getId(), photo, description);
+            } catch (MyException ex) {
                 msg = null;
             }
             return null;
@@ -515,8 +510,8 @@ public class gallery2 extends Activity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                WebService.invokeDeleteFromGalleryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, picId);
-            } catch (PException ex) {
+                WebService.invokeDeleteFromGalleryWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), picId);
+            } catch (MyException ex) {
                 msg = null;
             }
             return null;
@@ -530,7 +525,11 @@ public class gallery2 extends Activity {
                 new MessageBox(gallery2.this, msg).show();
             } else {
                 dialog_wait.dismiss();
-                database.deleteImageFromGallery(picId);
+                try {
+                    database.deleteImageFromGallery(picId);
+                } catch (MyException e) {
+                    new MessageBox(gallery2.this, e.getMessage()).show();
+                }
                 Toast.makeText(gallery2.this, "عملیات حذف با موفقیت انجام شده است .", Toast.LENGTH_SHORT).show();
                 photos.remove(position);
                 visist_list.remove(position);
@@ -569,8 +568,8 @@ public class gallery2 extends Activity {
         protected Void doInBackground(String... strings) {
             try {
                 WebService.invokeChangeGalleryPicDescriptionWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, picId, description);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), picId, description);
+            } catch (MyException ex) {
                 msg = null;
             }
             return null;
@@ -585,7 +584,11 @@ public class gallery2 extends Activity {
             } else {
                 dialog_wait.dismiss();
 
-                database.updateImageInGallery(picId, description);
+                try {
+                    database.updateImageInGallery(picId, description);
+                } catch (MyException e) {
+                    new MessageBox(gallery2.this, e.getMessage()).show();
+                }
                 Toast.makeText(gallery2.this, "عملیات بروز رسانی عکس با موفقیت انجام شده است .", Toast.LENGTH_SHORT).show();
                 PhotoDesc photoDesc = photos.get(position);
                 photoDesc.setDescription(description);
@@ -623,8 +626,8 @@ public class gallery2 extends Activity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                imagesInWeb = WebService.invokeGetPhotoDescsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                imagesInWeb = WebService.invokeGetPhotoDescsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
 
@@ -643,7 +646,7 @@ public class gallery2 extends Activity {
                     asyncDeleteJunkPic = new asyncDeletePicFromPhone();
                     asyncDeleteJunkPic.execute();
                 } else {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
+                    if (G.officeInfo.getRole() == UserType.Dr.ordinal() || G.officeInfo.getRole() == UserType.secretary.ordinal()) {
                         insertLayout.setVisibility(View.VISIBLE);
                     }
                 }
@@ -667,7 +670,7 @@ public class gallery2 extends Activity {
         }
         adapter = new CustomListAdapterGallery2(gallery2.this, photos);
         mListView.setAdapter(adapter);
-        if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
+        if (G.officeInfo.getRole() == UserType.Dr.ordinal() || G.officeInfo.getRole() == UserType.secretary.ordinal()) {
             insertLayout.setVisibility(View.VISIBLE);
         }
 
@@ -713,7 +716,11 @@ public class gallery2 extends Activity {
                 new MessageBox(gallery2.this, "خطایی در حذف عکس رخ داده است .").show();
             } else {
                 for (int i = 0; i < imageInPhone.size(); i++) {
-                    database.deleteImageFromGallery(imageInPhone.get(i));
+                    try {
+                        database.deleteImageFromGallery(imageInPhone.get(i));
+                    } catch (MyException e) {
+                        new MessageBox(gallery2.this, e.getMessage());
+                    }
                 }
             }
         }
@@ -746,9 +753,9 @@ public class gallery2 extends Activity {
                 if (photo == null) {
                     existInPhone = false;
                     photo = WebService.invokeGetGalleryPicWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                            , G.officeId, photoId);
+                            , G.officeInfo.getId(), photoId);
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
 
@@ -763,9 +770,13 @@ public class gallery2 extends Activity {
             } else {
                 if (photo != null) {
                     if (!existInPhone) {
-                        if (database.openConnection()) {
-                            database.saveImageToGallery(photo.getId(), photo.getDate(),
-                                    photo.getDescription(), DbBitmapUtility.getBytes(photo.getPhoto()));
+                        try {
+                            if (database.openConnection()) {
+                                database.saveImageToGallery(photo.getId(), photo.getDate(),
+                                        photo.getDescription(), DbBitmapUtility.getBytes(photo.getPhoto()));
+                            }
+                        } catch (MyException e) {
+                            new MessageBox(gallery2.this, e.getMessage()).show();
                         }
                     }
 

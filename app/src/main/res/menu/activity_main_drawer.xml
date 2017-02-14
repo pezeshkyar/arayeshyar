@@ -2,12 +2,16 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:id="@+id/nav2_myOffice"
+        android:icon="@drawable/ic_home"
+        android:title="آرایشگاه من" />
+    <item
         android:id="@+id/nav2_secretary"
-        android:icon="@drawable/ic_secretary_manage"
+        android:icon="@drawable/account_settings_variant"
         android:title="مدیریت منشی" />
     <item
         android:id="@+id/nav2_assistant"
-        android:icon="@drawable/ic_secretary_manage"
+        android:icon="@drawable/account_settings_variant"
         android:title="مدیریت همکار آرایشی" />
     <item
         android:id="@+id/nav2_reception"
@@ -35,16 +39,12 @@
         android:title="کاردکس" />
     <item
         android:id="@+id/nav2_addTurn"
-        android:icon="@drawable/ic_get_turn_black_24dp"
+        android:icon="@drawable/ticket"
         android:title="دریافت نوبت" />
     <item
         android:id="@+id/nav2_gallery"
         android:icon="@drawable/ic_gallery"
         android:title="گالری عکس" />
-    <item
-        android:id="@+id/nav2_news"
-        android:icon="@drawable/ic_menu_news"
-        android:title="خبرنامه" />
     <item
         android:id="@+id/nav2_user_patientFile"
         android:icon="@drawable/ic_assignment_black_24dp"
@@ -61,4 +61,52 @@
         android:id="@+id/nav2_manage_nobat"
         android:icon="@drawable/ic_timetable_black_24"
         android:title="مدیریت نوبت دهی" />
+    <item
+        android:id="@+id/nav1_signIn"
+        android:icon="@drawable/ic_lock_open"
+        android:title="ورود یا عضویت" />
+    <item
+        android:id="@+id/nav1_signUp"
+        android:icon="@drawable/ic_person_add"
+        android:title="عضویت" />
+    <item
+        android:id="@+id/nav2_account"
+        android:icon="@drawable/ic_person_outline_black_24dp"
+        android:title="حساب کاربری" />
+    <item
+        android:id="@+id/nav2_support"
+        android:icon="@drawable/ic_support"
+        android:title="پشتیبانی" />
+    <item
+        android:id="@+id/nav2_news"
+        android:icon="@drawable/ic_menu_news"
+        android:title="خبرنامه" />
+    <item
+        android:id="@+id/nav2_about"
+        android:icon="@drawable/ic_info_outline_black_24dp"
+        android:title="درباره ما" />
+    <item
+        android:id="@+id/nav2_logout"
+        android:icon="@drawable/ic_quit"
+        android:title="خروج" />
+    <item
+        android:id="@+id/nav2_etebar"
+        android:icon="@drawable/ic_account_balance_wallet_black_24dp"
+        android:title="افزایش اعتبار" />
+    <item
+    android:id="@+id/nav2_inbox"
+    android:icon="@drawable/ic_menu_inbox"
+    android:title="پیام ها" />
+    <item
+        android:id="@+id/nav2_setting"
+        android:icon="@drawable/settings"
+        android:title="تنظیمات" />
+    <item
+    android:id="@+id/nav2_back"
+    android:icon="@drawable/ic_back_right_black"
+    android:title="بازگشت به منوی اصلی" />
+    <item
+        android:id="@+id/nav2_new_office"
+        android:icon="@drawable/ic_back_right_black"
+        android:title="آرایشگاه جدید" />
 </menu>

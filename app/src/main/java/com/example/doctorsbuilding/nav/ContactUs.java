@@ -7,15 +7,11 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.example.doctorsbuilding.nav.Util.NonScrollListView;
-import com.example.doctorsbuilding.nav.Util.RoundedImageView;
+import com.example.doctorsbuilding.nav.Util.Util;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
@@ -30,7 +26,7 @@ public class ContactUs extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ContactUs.this);
+        Util.setStatusBarColor(ContactUs.this);
         setContentView(R.layout.activity_contact_us);
         initView();
         eventListener();

@@ -15,6 +15,8 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.doctorsbuilding.nav.User.User;
+import com.example.doctorsbuilding.nav.User.UserInboxActivity;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
@@ -31,6 +33,7 @@ public class CancelReservationDialog extends Dialog {
     private int selectedItem = -1;
     private ListView mListView;
     private TextView nothingTxt;
+    private CustomReservationListAdapter reservationListAdapter;
     private ArrayList<Reservation> reservations;
     private ProgressBar progressBar;
 
@@ -54,6 +57,8 @@ public class CancelReservationDialog extends Dialog {
 
     private void initViews() {
         mListView = (ListView) findViewById(R.id.cancelReservationListView);
+        reservationListAdapter = new CustomReservationListAdapter(context, new ArrayList<User>());
+        mListView.setAdapter(reservationListAdapter);
         progressBar = (ProgressBar) findViewById(R.id.cancelReservation_Progress);
         nothingTxt = (TextView) findViewById(R.id.cancelReservation_nothing);
         getReservationByTurnIdTask = new asyncCallGetReservationByTurnIdWS();
@@ -73,23 +78,25 @@ public class CancelReservationDialog extends Dialog {
     }
 
     private void eventListener() {
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+        reservationListAdapter.setOnItemClickListener(new OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                final MessageBox message = new MessageBox(context, "شما در حال حذف این نوبت می باشید !");
-                message.show();
+            public void onItemClick(final int position, LviActionType actionType) {
+                if (actionType == LviActionType.select) {
+                    final MessageBox message = new MessageBox(context, "شما در حال حذف این نوبت می باشید !");
+                    message.show();
 
-                message.setOnDismissListener(new OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialogInterface) {
-                        if (message.pressAcceptButton()) {
-                            selectedItem = position;
-                            cancelReservationTask = new asyncCallCancelReservationWS();
-                            cancelReservationTask.execute();
+                    message.setOnDismissListener(new OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialogInterface) {
+                            if (message.pressAcceptButton()) {
+                                selectedItem = position;
+                                cancelReservationTask = new asyncCallCancelReservationWS();
+                                cancelReservationTask.execute();
+                            }
                         }
-                    }
-                });
-
+                    });
+                }
             }
         });
     }
@@ -106,8 +113,8 @@ public class CancelReservationDialog extends Dialog {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                reservations = WebService.invokeGetReservationByTurnIdWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, turnId);
-            } catch (PException ex) {
+                reservations = WebService.invokeGetReservationByTurnIdWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), turnId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
 
@@ -121,15 +128,16 @@ public class CancelReservationDialog extends Dialog {
                 new MessageBox(context, msg).show();
             } else {
                 if (reservations.size() != 0) {
-                    ArrayList<String> userInfo = null;
-                    ArrayList<ArrayList<String>> users = new ArrayList<ArrayList<String>>();
+                    User userInfo = null;
+                    ArrayList<User> users = new ArrayList<User>();
                     for (Reservation res : reservations) {
-                        userInfo = new ArrayList<String>();
-                        userInfo.add(res.getPatientFirstName() + " " + res.getPatientLastName());
-                        userInfo.add(res.getPatientPhoneNo());
+                        userInfo = new User();
+                        userInfo.setFirstName(res.getPatientFirstName());
+                        userInfo.setLastName(res.getPatientLastName());
+                        userInfo.setPhone(res.getPatientPhoneNo());
                         users.add(userInfo);
                     }
-                    mListView.setAdapter(new CustomReservationListAdapter(getContext(), users, turnId));
+                    reservationListAdapter.addAll(users);
                     progressBar.setVisibility(View.GONE);
                 } else {
                     progressBar.setVisibility(View.GONE);
@@ -157,7 +165,7 @@ public class CancelReservationDialog extends Dialog {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeCancleReservation(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservations.get(selectedItem).getId());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

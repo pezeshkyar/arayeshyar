@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -19,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.User.User;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -32,7 +32,6 @@ public class ActivitySearchPatient extends AppCompatActivity {
     private EditText username;
     private EditText name;
     private EditText lastname;
-    private EditText mobileNo;
     private ImageButton backBtn;
     private Button searchBtn;
     TextView pageTitle;
@@ -44,7 +43,7 @@ public class ActivitySearchPatient extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivitySearchPatient.this);
+        Util.setStatusBarColor(ActivitySearchPatient.this);
         setContentView(R.layout.activity_search_patient);
         intiViews();
         eventsListener();
@@ -65,7 +64,6 @@ public class ActivitySearchPatient extends AppCompatActivity {
         username = (EditText) findViewById(R.id.searchPatient_username);
         name = (EditText) findViewById(R.id.searchPatient_name);
         lastname = (EditText)findViewById(R.id.searchPatient_family);
-        mobileNo = (EditText)findViewById(R.id.searchPatient_mobile);
         pageTitle = (TextView)findViewById(R.id.toolbar_title);
         pageTitle.setText("جستجو");
         backBtn = (ImageButton) findViewById(R.id.toolbar_backBtn);
@@ -107,14 +105,13 @@ public class ActivitySearchPatient extends AppCompatActivity {
             user.setUserName(username.getText().toString().trim());
             user.setFirstName(name.getText().toString().trim());
             user.setLastName(lastname.getText().toString().trim());
-            user.setPhone(mobileNo.getText().toString());
         }
 
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                users = WebService.invokeSearchUserWS(user.getUserName(), user.getFirstName(), user.getLastName(), user.getPhone());
-            } catch (PException ex) {
+                users = WebService.invokeSearchUserWS(user.getUserName(), user.getFirstName(), user.getLastName());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

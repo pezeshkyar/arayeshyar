@@ -2,7 +2,6 @@ package com.example.doctorsbuilding.nav.support;
 
 
 import android.app.Activity;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -14,13 +13,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Dr.persindatepicker.util.PersianCalendar;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class DiscussActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_discuss);
-        G.setStatusBarColor(DiscussActivity.this);
+        Util.setStatusBarColor(DiscussActivity.this);
 
         ticketId = this.getIntent().getIntExtra("id", 0);
 
@@ -129,7 +128,7 @@ public class DiscussActivity extends Activity {
             String res = null;
             try {
                 res = WebService.invokeSetUserTicketMessageWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), ticketId, msg);
-            } catch (PException e) {
+            } catch (MyException e) {
                 errMsg = e.getMessage();
                 return null;
             } catch (Throwable t) {
@@ -175,8 +174,8 @@ public class DiscussActivity extends Activity {
         protected Boolean doInBackground(String... strings) {
             boolean res = true;
             try {
-                messages = WebService.invokeGetUserTicketMessageWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, ticketId);
-            } catch (PException e) {
+                messages = WebService.invokeGetUserTicketMessageWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), ticketId);
+            } catch (MyException e) {
                 res = false;
                 msg = e.getMessage();
             }

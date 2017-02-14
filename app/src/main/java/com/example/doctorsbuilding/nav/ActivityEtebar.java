@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -18,7 +17,6 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.MoneyTextWatcher;
 import com.example.doctorsbuilding.nav.Util.Util;
@@ -42,7 +40,7 @@ public class ActivityEtebar extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityEtebar.this);
+        Util.setStatusBarColor(ActivityEtebar.this);
         setContentView(R.layout.activity_etebar);
         pageTitle = (TextView) findViewById(R.id.toolbar_title);
         pageTitle.setText(Util.getStringWS(R.string.etebar_title));
@@ -125,7 +123,7 @@ public class ActivityEtebar extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 amount = WebService.invokeGetWalletWS(G.UserInfo.getUserName(), G.UserInfo.getPassword());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

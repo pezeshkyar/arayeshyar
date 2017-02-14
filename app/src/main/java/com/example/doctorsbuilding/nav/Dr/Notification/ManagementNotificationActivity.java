@@ -7,7 +7,6 @@ import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.view.ViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
@@ -15,18 +14,18 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.CustomAdapterSpinner;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Rturn;
 import com.example.doctorsbuilding.nav.Util.CustomDatePickerDialog;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -58,7 +57,7 @@ public class ManagementNotificationActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ManagementNotificationActivity.this);
+        Util.setStatusBarColor(ManagementNotificationActivity.this);
         setContentView(R.layout.activity_notification_management);
         initViews();
         eventListener();
@@ -257,9 +256,9 @@ public class ManagementNotificationActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                mRturns = WebService.invokeGetPatientTurnInfoByDate(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId
+                mRturns = WebService.invokeGetPatientTurnInfoByDate(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId()
                         , strings[0], strings[1]);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -328,9 +327,9 @@ public class ManagementNotificationActivity extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeSendMessageBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId
+                result = WebService.invokeSendMessageBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId()
                         , receivers, phoneNos, strings[0], strings[1]);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

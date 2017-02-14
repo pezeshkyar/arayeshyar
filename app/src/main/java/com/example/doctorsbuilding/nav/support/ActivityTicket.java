@@ -2,7 +2,6 @@ package com.example.doctorsbuilding.nav.support;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.media.tv.TvView;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -17,19 +16,13 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.doctorsbuilding.nav.Dr.Clinic.Office;
-import com.example.doctorsbuilding.nav.Expert;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
-import com.example.doctorsbuilding.nav.SubExpert;
-import com.example.doctorsbuilding.nav.User.City;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
@@ -159,8 +152,8 @@ public class ActivityTicket extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                subject_list = WebService.invokeGetTicketSubjectWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                subject_list = WebService.invokeGetTicketSubjectWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -218,11 +211,11 @@ public class ActivityTicket extends AppCompatActivity {
             try {
                 ticketId = WebService.invokeRegisterTicketWS(
                         G.UserInfo.getUserName(), G.UserInfo.getPassword(),
-                        G.officeId, t);
+                        G.officeInfo.getId(), t);
                 t.setId(ticketId);
                 res = WebService.invokeSetUserTicketMessageWS(
                         G.UserInfo.getUserName(), G.UserInfo.getPassword(), ticketId, ticketMsg);
-            } catch (PException e) {
+            } catch (MyException e) {
                 errMsg = e.getMessage();
             }
 

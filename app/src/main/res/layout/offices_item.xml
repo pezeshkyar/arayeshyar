@@ -23,15 +23,16 @@
             android:layout_height="96dp"
             app:civ_border_color="@color/colorDivider"
             app:civ_border_width="2dp" />
+
         <TextView
             android:id="@+id/offices_item_officeCode"
             android:layout_width="100dp"
-            android:layout_marginTop="10dp"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:text="کد آرایشگاه:"
-            android:gravity="center"/>
+            android:layout_centerVertical="true"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:text="کد آرایشگاه:" />
     </LinearLayout>
 
     <LinearLayout
@@ -62,28 +63,28 @@
             android:id="@+id/offices_item_expert"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
             android:layout_marginBottom="4dp"
-            android:text="آرایشگر حرفه ای" />
+            android:text="آرایشگر حرفه ای"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/offices_item_address"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="2dp"
-            android:textSize="14sp"
             android:maxLines="1"
             android:text="ساری بوار امیر مازندرانی جنب کوچه صفا ساختمان بلور کلینیک دکتر سخایی پلاک 19"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/offices_item_phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="14sp"
             android:gravity="right"
             android:text="تلفن : 0113332658"
-            android:textColor="@color/textColor" />
+            android:textColor="@color/textColor"
+            android:textSize="14sp" />
     </LinearLayout>
 
     <FrameLayout
@@ -96,7 +97,8 @@
             android:layout_height="25dp"
             android:layout_gravity="center_vertical"
             android:background="?selectableItemBackgroundBorderless"
-            android:drawableTop="@drawable/ic_clear_black_24dp" />
+            android:drawableTop="@drawable/ic_clear_black_24dp"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/offices_btn_favorite"
@@ -104,8 +106,17 @@
             android:layout_height="25dp"
             android:layout_gravity="center_vertical"
             android:background="?selectableItemBackgroundBorderless"
-            android:drawableTop="@drawable/ic_favorite_border_black_24dp"
+            android:drawableTop="@drawable/ic_star_border_black_24dp"
             android:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/offices_btn_setting"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:layout_gravity="center_vertical"
+            android:background="?selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_more_vert_white_24dp"
+            android:tint="@android:color/black"/>
     </FrameLayout>
 
 </android.support.percent.PercentRelativeLayout>

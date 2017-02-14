@@ -167,7 +167,7 @@ public class ExpandListAdapter extends BaseExpandableListAdapter {
 
     private void checkTurn(Holder holder, ExpChild child) {
 
-        if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
+        if (G.officeInfo.getRole() == UserType.Dr.ordinal() || G.officeInfo.getRole() == UserType.secretary.ordinal()) {
             if (child.getTurn().getReserved() > 0) {
                 holder.addNobatBtn.setVisibility(View.GONE);
                 holder.fullCapacityBtn.setVisibility(View.GONE);
@@ -287,13 +287,13 @@ public class ExpandListAdapter extends BaseExpandableListAdapter {
             G.reservationInfo = null;
             if (reservationId > 0) {
 //                Toast.makeText(context, results, Toast.LENGTH_LONG).show();
-                if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
+                if (G.officeInfo.getRole() == UserType.Dr.ordinal() || G.officeInfo.getRole() == UserType.secretary.ordinal()) {
 
                     temp.setReserved(currentTurn.getReserved() + 1);
                     temp.setIsReserved(true);
                     notifyDataSetChanged();
 
-                } else if (G.UserInfo.getRole() == UserType.User.ordinal()) {
+                } else if (G.officeInfo.getRole() == UserType.User.ordinal()) {
 
                     temp.setReserved(currentTurn.getReserved() + 1);
                     temp.setIsReserved(true);

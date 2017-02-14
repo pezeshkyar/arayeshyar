@@ -35,7 +35,7 @@ public class ActivityFactor extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityFactor.this);
+        Util.setStatusBarColor(ActivityFactor.this);
         setContentView(R.layout.activity_factor_layout);
         requestCode = getIntent().getIntExtra("requestCode", -1);
         intiViews();
@@ -81,16 +81,21 @@ public class ActivityFactor extends AppCompatActivity {
                 dialogPayType.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialogInterface) {
-                        if (dialogPayType.getPayWay() == 0) {
-                            //SAMAN BANK
-                            Intent intent = new Intent(ActivityFactor.this, ActivityPaymnet.class);
-                            intent.putExtra("amount", G.reservationInfo.getPrice());
-                            intent.putExtra("requestCode", requestCode);
-                            startActivityForResult(intent, requestCode);
-                        } else if (dialogPayType.getPayWay() == 1) {
-                            //wallet
-                            setResult(requestCode);
-                            finish();
+                        switch (dialogPayType.getPayWay()){
+                            case 0:
+                                //SAMAN BANK
+                                Intent intent = new Intent(ActivityFactor.this, ActivityPaymnet.class);
+                                intent.putExtra("amount", G.reservationInfo.getPrice());
+                                intent.putExtra("requestCode", requestCode);
+                                startActivityForResult(intent, requestCode);
+                                break;
+                            case 1:
+                                //wallet
+                                setResult(requestCode);
+                                finish();
+                                break;
+                            case 2:
+                                break;
                         }
                     }
                 });

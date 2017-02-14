@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
 import android.view.View;
@@ -16,16 +15,16 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ public class ActivityCartex extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityCartex.this);
+        Util.setStatusBarColor(ActivityCartex.this);
         setContentView(R.layout.activity_cartex);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         initViews();
@@ -112,7 +111,7 @@ public class ActivityCartex extends AppCompatActivity {
                 CheckBox chbox = new CheckBox(ActivityCartex.this);
                 chbox.setId(q.getId());
                 chbox.setText(q.getLabel());
-                chbox.setTypeface(G.getNormalFont());
+                chbox.setTypeface(Util.getNormalFont());
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 10, 0, 0);
                 chbox.setLayoutParams(params);
@@ -122,7 +121,7 @@ public class ActivityCartex extends AppCompatActivity {
             } else {
                 TextView mTV = new TextView(ActivityCartex.this);
                 mTV.setText(q.getLabel());
-                mTV.setTypeface(G.getNormalFont());
+                mTV.setTypeface(Util.getNormalFont());
                 mTV.setTextColor(Color.BLACK);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 10, 0, 0);
@@ -132,7 +131,7 @@ public class ActivityCartex extends AppCompatActivity {
                 EditText mTxt = new EditText(ActivityCartex.this);
                 mTxt.setId(q.getId());
                 mTxt.setHint(q.getLabel());
-                mTxt.setTypeface(G.getNormalFont());
+                mTxt.setTypeface(Util.getNormalFont());
                 LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params1.setMargins(0, 10, 0, 0);
                 mTxt.setLayoutParams(params1);
@@ -143,7 +142,7 @@ public class ActivityCartex extends AppCompatActivity {
         }
 
         insertBtn.setText("ثبت اطلاعات");
-        insertBtn.setTypeface(G.getNormalFont());
+        insertBtn.setTypeface(Util.getNormalFont());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 20, 0, 0);
         insertBtn.setBackgroundResource(R.drawable.my_button);
@@ -168,8 +167,8 @@ public class ActivityCartex extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -232,8 +231,8 @@ public class ActivityCartex extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeSetReplyBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, questionIds, answers);
-            } catch (PException ex) {
+                result = WebService.invokeSetReplyBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), questionIds, answers);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -269,8 +268,8 @@ public class ActivityCartex extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                replies = WebService.invokeGetReplyWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, G.UserInfo.getUserName());
-            } catch (PException ex) {
+                replies = WebService.invokeGetReplyWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), G.UserInfo.getUserName());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

@@ -92,42 +92,21 @@
                         android:paddingTop="10dp"
                         android:src="@drawable/ic_menu_black_24dp"
                         android:tint="@android:color/white" />
-
-                    <TextView
-                        android:id="@+id/mainpage_title"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="10dp"
-                        android:layout_marginTop="15dp"
-                        android:layout_toLeftOf="@id/menu_btn"
-                        android:text=""
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <ImageButton
-                        android:id="@+id/btnCall"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                    <RelativeLayout
+                        android:id="@+id/unreadMessage1"
+                        android:layout_width="40dp"
+                        android:layout_height="match_parent"
                         android:layout_alignParentLeft="true"
+                        android:layout_marginTop="5dp"
                         android:layout_marginLeft="10dp"
-                        android:layout_marginTop="17dp"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_menu_call"
-                        android:tint="@android:color/white"
-                        android:visibility="gone" />
+                        android:paddingTop="10dp">
 
-                    <ImageButton
-                        android:id="@+id/btnNotice"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentLeft="true"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginTop="12dp"
-                        android:background="?selectableItemBackgroundBorderless"
-                        android:src="@drawable/ic_sheipor"
-                        android:tint="@android:color/white"
-                        android:visibility="gone" />
+                        <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentLeft="true"
+                            android:background="@drawable/ic_messages" />
+                    </RelativeLayout>
                 </RelativeLayout>
 
             </android.support.v7.widget.Toolbar>
@@ -135,6 +114,7 @@
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.NestedScrollView
+        android:layout_marginBottom="50dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -223,28 +203,43 @@
 
     </android.support.v4.widget.NestedScrollView>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_getTurn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:src="@drawable/ic_get_turn_white_24dp"
-        android:tint="@android:color/white"
-        android:visibility="gone"
-        app:backgroundTint="@color/myyellow"
-        app:layout_anchor="@id/cm1_appbar"
-        app:layout_anchorGravity="bottom|left|start" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_getReception"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:src="@drawable/ic_patients"
-        android:tint="@android:color/white"
-        android:visibility="gone"
-        app:backgroundTint="@color/myyellow"
-        app:layout_anchor="@id/cm1_appbar"
-        app:layout_anchorGravity="bottom|left|start" />
+        <RelativeLayout
+            android:background="@drawable/oval_layout"
+            android:layout_gravity="bottom|center|center_horizontal"
+            android:layout_marginRight="60dp"
+            android:layout_marginBottom="10dp"
+            android:layout_marginLeft="60dp"
+            android:layout_width="match_parent"
+            android:layout_height="?android:attr/actionBarSize">
+            <Button
+                android:id="@+id/main_activity_floatbtn1"
+                android:layout_toRightOf="@+id/id2"
+                android:layout_marginLeft="10dp"
+                android:textColor="@android:color/white"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <View
+                android:id="@+id/id2"
+                android:text="id2"
+                android:layout_centerHorizontal="true"
+                android:layout_width="1dp"
+                android:layout_centerVertical="true"
+                android:background="@color/whitesmoke"
+                android:layout_height="40dp" />
+            <Button
+                android:id="@+id/main_activity_floatbtn2"
+                android:layout_marginRight="10dp"
+                android:textColor="@android:color/white"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_toLeftOf="@id/id2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+    </FrameLayout>
 
 </android.support.design.widget.CoordinatorLayout>

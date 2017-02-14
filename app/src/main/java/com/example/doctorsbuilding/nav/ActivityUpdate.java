@@ -1,8 +1,6 @@
 package com.example.doctorsbuilding.nav;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
-import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,20 +18,12 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 
-import com.example.doctorsbuilding.nav.MainForm.ActivityLoading;
 import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.Hashing;
 import com.example.doctorsbuilding.nav.Web.WebService;
@@ -64,7 +54,7 @@ public class ActivityUpdate extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.app_loading_layout);
-        G.setStatusBarColor(ActivityUpdate.this);
+        Util.setStatusBarColor(ActivityUpdate.this);
         initViews();
         eventListener();
         checkIsOnline();
@@ -123,7 +113,7 @@ public class ActivityUpdate extends AppCompatActivity {
     }
 
     private void loadData() {
-        G.getSharedPreferences().edit().remove("ignore").apply();
+        Util.getSharedPreferences(ActivityUpdate.this).edit().remove("ignore").apply();
         frm_run.setVisibility(View.VISIBLE);
         try {
             pInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
@@ -166,7 +156,7 @@ public class ActivityUpdate extends AppCompatActivity {
                 if (pwd != null)
                     versionInfo = WebService.getVersionInfo(strings[0], pwd);
 
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -177,7 +167,7 @@ public class ActivityUpdate extends AppCompatActivity {
             super.onPostExecute(aVoid);
             if (versionInfo != null) {
 
-                if (G.getSharedPreferences().getString("ignore", "").equals(String.valueOf(versionInfo.getVersionName()))) {
+                if (Util.getSharedPreferences(ActivityUpdate.this).getString("ignore", "").equals(String.valueOf(versionInfo.getVersionName()))) {
                     startActivity(new Intent(ActivityUpdate.this, ActivityLoading.class));
                     ActivityUpdate.this.overridePendingTransition(0, 0);
                     finish();
@@ -211,7 +201,7 @@ public class ActivityUpdate extends AppCompatActivity {
                                 break;
 
                             case DialogInterface.BUTTON_NEGATIVE:
-                                SharedPreferences.Editor editor = G.getSharedPreferences().edit();
+                                SharedPreferences.Editor editor = Util.getSharedPreferences(ActivityUpdate.this).edit();
                                 editor.putString(Util.getStringWS(R.string.ws_Ignore), String.valueOf(versionInfo.getVersionName()));
                                 editor.apply();
                                 startActivity(new Intent(ActivityUpdate.this, ActivityLoading.class));

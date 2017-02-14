@@ -1,6 +1,5 @@
 package com.example.doctorsbuilding.nav;
 
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -20,7 +19,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
@@ -84,7 +82,7 @@ public class ActivityManagementTaskes extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityManagementTaskes.this);
+        Util.setStatusBarColor(ActivityManagementTaskes.this);
         setContentView(R.layout.activity_manage_tasks);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
@@ -413,8 +411,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                taskGroups = WebService.invokeGetTaskGroupsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                taskGroups = WebService.invokeGetAllTaskGroupsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -459,8 +457,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 taskGroupId = WebService.invokeAddTaskGroupWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskGroupName);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskGroupName);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -477,7 +475,7 @@ public class ActivityManagementTaskes extends AppCompatActivity {
 
                     TaskGroup taskGroup = new TaskGroup();
                     taskGroup.setId(taskGroupId);
-                    taskGroup.setOfficeId(G.officeId);
+                    taskGroup.setOfficeId(G.officeInfo.getId());
                     taskGroup.setName(taskGroupName);
                     taskGroup_adapter.add(taskGroup);
 
@@ -527,8 +525,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 taskId = WebService.invokeAddTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskName, taskGroupId, price);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskName, taskGroupId, price);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -546,7 +544,7 @@ public class ActivityManagementTaskes extends AppCompatActivity {
                     Task task = new Task();
                     task.setId(taskId);
                     task.setGroupId(taskGroupId);
-                    task.setOfficeId(G.officeId);
+                    task.setOfficeId(G.officeInfo.getId());
                     task.setPrice(price);
                     task.setName(taskName);
                     task_adapter.add(task);
@@ -584,8 +582,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 taskes = WebService.invokeGetTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskGroupId);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskGroupId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -636,8 +634,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeUpdateTaskGroupWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskGroupId, taskGroupName);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskGroupId, taskGroupName);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -689,8 +687,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeDeleteTaskGroupWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskGroupId);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskGroupId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -749,12 +747,12 @@ public class ActivityManagementTaskes extends AppCompatActivity {
             try {
 
                 result_update_taskName = WebService.invokeUpdateTaskNameWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskId, taskName);
+                        , G.officeInfo.getId(), taskId, taskName);
 
                 result_update_taskPrice = WebService.invokeUpdateTaskPriceWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskId, taskPrice);
+                        , G.officeInfo.getId(), taskId, taskPrice);
 
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -813,8 +811,8 @@ public class ActivityManagementTaskes extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 result = WebService.invokeDeleteTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
-                        , G.officeId, taskId);
-            } catch (PException ex) {
+                        , G.officeInfo.getId(), taskId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

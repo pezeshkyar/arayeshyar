@@ -27,19 +27,22 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Databases.DatabaseAdapter;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.MainForm.ActivityOffices;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.ActivityLoading;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.UserType;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.Util;
+import com.example.doctorsbuilding.nav.Util.compressor.Compressor;
 import com.example.doctorsbuilding.nav.Web.Hashing;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
@@ -54,7 +57,7 @@ public class UserProfileActivity extends AppCompatActivity {
     private EditText txtFirstName;
     private EditText txtLastName;
     private EditText txtMobile;
-    private EditText txtUserName;
+    private TextView txtUserName;
     private EditText txtPassword;
     private EditText txtRePassword;
     private EditText txtEmail;
@@ -87,7 +90,7 @@ public class UserProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_personal_info);
-        G.setStatusBarColor(UserProfileActivity.this);
+        Util.setStatusBarColor(UserProfileActivity.this);
         initViews();
         stateTask = new AsyncCallStateWS();
         stateTask.execute();
@@ -113,6 +116,11 @@ public class UserProfileActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
     private void initViews() {
         btn_setting = (ImageButton) findViewById(R.id.personalInfo_setting);
         btn_setting.setVisibility(View.GONE);
@@ -126,14 +134,14 @@ public class UserProfileActivity extends AppCompatActivity {
         txtMobile = (EditText) findViewById(R.id.dr_Mobile);
         txtMobile.setRawInputType(Configuration.KEYBOARD_QWERTY);
         txtMobile.setVisibility(View.GONE);
-        txtUserName = (EditText) findViewById(R.id.dr_UserName);
+        txtUserName = (TextView) findViewById(R.id.dr_UserName);
         txtUserName.setRawInputType(Configuration.KEYBOARD_QWERTY);
         txtUserName.setVisibility(View.GONE);
         txtPassword = (EditText) findViewById(R.id.dr_Password);
         txtPassword.setVisibility(View.GONE);
         txtRePassword = (EditText) findViewById(R.id.dr_ConfirmPassword);
         txtRePassword.setVisibility(View.GONE);
-        txtEmail = (EditText)findViewById(R.id.dr_email);
+        txtEmail = (EditText) findViewById(R.id.dr_email);
         txtEmail.setVisibility(View.GONE);
         spinnerState = (Spinner) findViewById(R.id.dr_profile_state);
         spinnerCity = (Spinner) findViewById(R.id.dr_profile_city);
@@ -223,6 +231,7 @@ public class UserProfileActivity extends AppCompatActivity {
         if (requestCode == CAMERA_REQUEST && resultCode == Activity.RESULT_OK) {
             if (data != null) {
                 try {
+
                     Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), data.getData());
                     int nh = (int) (bitmap.getHeight() * (512.0 / bitmap.getWidth()));
                     userPic = Bitmap.createScaledBitmap(bitmap, 512, nh, true);
@@ -230,7 +239,6 @@ public class UserProfileActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
             }
         }
     }
@@ -263,7 +271,7 @@ public class UserProfileActivity extends AppCompatActivity {
                 stateList = WebService.invokeGetProvinceNameWS();
                 if (stateList != null)
                     cityList = WebService.invokeGetCityNameWS(stateID);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -312,7 +320,7 @@ public class UserProfileActivity extends AppCompatActivity {
         protected Void doInBackground(String... strings) {
             try {
                 cityList = WebService.invokeGetCityNameWS(stateID);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -361,7 +369,7 @@ public class UserProfileActivity extends AppCompatActivity {
             user = setUserData();
             try {
                 result = WebService.invokeRegisterWS(user);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
 
             }
@@ -372,8 +380,8 @@ public class UserProfileActivity extends AppCompatActivity {
             User user = new User();
             user.setFirstName(txtFirstName.getText().toString().trim());
             user.setLastName(txtLastName.getText().toString().trim());
-            user.setUserName(G.getSharedPreferences().getString("user", ""));
-            password = G.getSharedPreferences().getString("pass", "");
+            user.setUserName(Util.getSharedPreferences(UserProfileActivity.this).getString("user", ""));
+            password = Util.getSharedPreferences(UserProfileActivity.this).getString("pass", "");
             try {
                 password = Hashing.SHA1(password);
             } catch (NoSuchAlgorithmException e) {
@@ -385,7 +393,6 @@ public class UserProfileActivity extends AppCompatActivity {
             user.setPhone("");
             user.setRole(UserType.User.ordinal());
             user.setCityID((cityList.get(spinnerCity.getSelectedItemPosition()).GetCityID()));
-
             if (userPic == null) {
                 user.setImgProfile(BitmapFactory.decodeResource(getResources(), R.drawable.doctor));
             } else {
@@ -406,7 +413,7 @@ public class UserProfileActivity extends AppCompatActivity {
                     dialog.dismiss();
                     Toast.makeText(UserProfileActivity.this, "ثبت مشخصات با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
                     G.UserInfo = user;
-                    SharedPreferences.Editor editor = G.getSharedPreferences().edit();
+                    SharedPreferences.Editor editor = Util.getSharedPreferences(UserProfileActivity.this).edit();
                     editor.putInt("role", UserType.User.ordinal());
                     editor.apply();
                     try {
@@ -414,7 +421,7 @@ public class UserProfileActivity extends AppCompatActivity {
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                     } catch (Exception ex) {
                     }
-                    setResult(SIGNUP_RESPONSE_CODE);
+                    startActivity(new Intent(UserProfileActivity.this, ActivityLoading.class));
                     finish();
                 } else {
                     dialog.dismiss();
@@ -435,34 +442,6 @@ public class UserProfileActivity extends AppCompatActivity {
             new MessageBox(UserProfileActivity.this, "لطفا نام خانوادگی خود را وارد نمایید .").show();
             return false;
         }
-//        if (txtMobile.getText().toString().trim().isEmpty()) {
-//            new MessageBox(UserProfileActivity.this, "لطفا شماره تلفن همراه خود را وارد نمایید .").show();
-//            return false;
-//        }
-//        if (txtUserName.getText().toString().trim().isEmpty()) {
-//            new MessageBox(UserProfileActivity.this, "لطفا کد ملی خود را وارد نمایید .").show();
-//            return false;
-//        }
-//        if (!Util.IsValidCodeMeli(txtUserName.getText().toString().trim())) {
-//            new MessageBox(UserProfileActivity.this, "کد ملی وارد شده نادرست می باشد .").show();
-//            return false;
-//        }
-//        if (txtPassword.getText().toString().trim().isEmpty()) {
-//            new MessageBox(UserProfileActivity.this, "لطفا پسورد خود را وارد نمایید .").show();
-//            return false;
-//        }
-//        if (txtPassword.getText().toString().trim().length() < 4) {
-//            new MessageBox(UserProfileActivity.this, "تعداد کاراکترهای پسورد نباید کمتر از 4 تا باشد .").show();
-//            return false;
-//        }
-//        if (txtRePassword.getText().toString().trim().isEmpty()) {
-//            new MessageBox(UserProfileActivity.this, "لطفا پسورد خود را دوباره وارد نمایید .").show();
-//            return false;
-//        }
-//        if (!txtPassword.getText().toString().trim().equals(txtRePassword.getText().toString().trim())) {
-//            new MessageBox(this, "پسورد وارد شده با هم مطابقت ندارد .").show();
-//            return false;
-//        }
         if (spinnerState.getSelectedItemPosition() == -1) {
             new MessageBox(UserProfileActivity.this, "لطفا استان محل سکونت خود را وارد نمایید .").show();
             return false;

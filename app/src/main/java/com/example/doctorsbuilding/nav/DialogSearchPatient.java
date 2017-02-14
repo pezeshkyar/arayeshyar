@@ -85,8 +85,8 @@ public class DialogSearchPatient extends Dialog {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                users = WebService.invokeSearchUserWS(user.getUserName(), user.getFirstName(), user.getLastName(), user.getPhone());
-            } catch (PException ex) {
+                users = WebService.invokeSearchUserWS(user.getUserName(), user.getFirstName(), user.getLastName());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -138,7 +138,7 @@ public class DialogSearchPatient extends Dialog {
             reservation.setPatientUserName(strings[0]);
             try {
                 result = WebService.invokeResevereForUser(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation);
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

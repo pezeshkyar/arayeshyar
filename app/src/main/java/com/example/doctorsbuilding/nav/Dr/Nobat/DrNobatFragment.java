@@ -1,7 +1,6 @@
 package com.example.doctorsbuilding.nav.Dr.Nobat;
 
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -15,15 +14,13 @@ import com.example.doctorsbuilding.nav.Dr.Profile.ExpChild;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpGroup;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpandListAdapter;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Turn;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
-
-import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class DrNobatFragment extends Fragment {
 
@@ -111,8 +108,8 @@ public class DrNobatFragment extends Fragment {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeGetAllTurnFromToday(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                result = WebService.invokeGetAllTurnFromToday(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

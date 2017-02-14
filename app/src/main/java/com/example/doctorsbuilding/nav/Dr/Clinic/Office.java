@@ -7,10 +7,11 @@ import android.graphics.Bitmap;
  */
 public class Office {
     private int id;
+    private int role;
+    private int isDefault;
     private String firstname;
     private String lastname;
     private String drUsername;
-    private boolean isMyOffice;
     private int cityId;
     private String cityName;
     private int stateId;
@@ -27,12 +28,21 @@ public class Office {
     private int timeQuantum;
     private Bitmap photo;
 
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getIsDefault() {
+        return isDefault;
+    }
+
+    public void setIsDefault(int isDefault) {
+        this.isDefault = isDefault;
     }
 
     public String getFirstname() {
@@ -179,12 +189,12 @@ public class Office {
         this.photo = photo;
     }
 
-    public int isMyOffice() {
-        return (isMyOffice ? 1 : 0);
+    public int getRole() {
+        return role;
     }
 
-    public void setMyOffice(boolean myOffice) {
-        isMyOffice = myOffice;
+    public void setRole(int role) {
+        this.role = role;
     }
 
     public Office clone() {
@@ -208,6 +218,8 @@ public class Office {
         office.biography = this.biography;
         office.timeQuantum = this.timeQuantum;
         office.photo = this.photo;
+        office.role = this.role;
+        office.isDefault = this.isDefault;
 
         return office;
     }

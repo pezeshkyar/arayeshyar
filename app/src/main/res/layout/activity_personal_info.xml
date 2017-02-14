@@ -181,12 +181,12 @@
                 android:maxLines="1"
                 android:padding="8dp" />
 
-            <EditText
+            <TextView
                 android:id="@+id/dr_UserName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:background="@drawable/my_edit_text"
+                android:background="@drawable/my_text_view"
                 android:digits="0123456789"
                 android:hint="@string/drUserName"
                 android:inputType="number|textNoSuggestions"

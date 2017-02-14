@@ -1,26 +1,19 @@
 package com.example.doctorsbuilding.nav;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
-import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -37,10 +30,13 @@ import com.example.doctorsbuilding.nav.Dr.Profile.ExpChild;
 import com.example.doctorsbuilding.nav.User.User;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
 import com.example.doctorsbuilding.nav.Util.Util;
-import com.example.doctorsbuilding.nav.Web.WebService;
 
-import java.io.IOException;
 import java.util.ArrayList;
+
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class DialogAddTurn extends DialogFragment {
 
@@ -48,49 +44,41 @@ public class DialogAddTurn extends DialogFragment {
     private CheckBox myCheckBox;
     private Context context;
     private Turn turnData;
-    private int resevationId = -1;
-    private Spinner taskGroupSpinner;
-    private Spinner taskSpinner;
-    private Spinner assitantSpinner;
+    private Spinner spinnerTaskGroup;
+    private Spinner spinnerTask;
+    private Spinner spinnerAssistant;
     private Button taskBackBtn;
-    private Button addTurnBtn;
-    private TextView addTurnPatientName;
+    private Button btnAddTurn;
+    private TextView patientName;
 
-    private TextView memberChboxTitle;
+    private TextView chBoxTitle_Dr;
     private TextView taskPrice;
-    private ListView memberListView;
-    private EditText memberUsername;
-    private EditText memberName;
-    private EditText memberFamily;
-    private EditText memberMobile;
-    private Button memberSearchBtn;
+    private ListView mListView;
+    private EditText user_Username;
+    private EditText user_firstname;
+    private EditText user_lastname;
+    private Button user_btnSearch;
 
-    private TextView nonMemberChboxTitle;
-    private ListView nonMemberListView;
-    private EditText nonMemberName;
-    private EditText nonMemberFamily;
-    private EditText nonMemberMobile;
-    private Button nonMemberSearchBtn;
-    private Button nonMemberInsertBtn;
-    private ArrayAdapter<User> user_adapter;
-    private ArrayAdapter<Task> task_adapter;
-    private ArrayList<User> users = null;
-    private ArrayList<TaskGroup> taskGroups;
-    private ArrayAdapter<TaskGroup> taskGroup_adapter;
-    private ArrayAdapter<Assistant> adapter_assistants;
-    private int selectedItem = -1;
-
-    asyncCallGetTaskes asyncGetTaskes;
-    asyncCallGetTaskGroups asyncGetTaskGroups;
-    asyncCallSearchUser searchUserTask;
-    asyncCallReserveForUserWS reserveForUserTask;
-    asyncCallReserveForMeWS reserveForMeTask;
-    asyncCallReserveForGuestWS reserveForGuestTask;
-    asyncCallReserveForGuestFromUserWS reserveForGuestFromUserTask;
-    asyncCallGetAssistants getAssistants;
+    private TextView chboxTitle_User;
+    private EditText guest_Name;
+    private EditText guest_lastname;
+    private EditText guest_mobile;
+    private Button guest_btnNext;
+    private CustomReservationListAdapter adapterUser;
+    private ArrayAdapter<Task> adapterTask;
+    private ArrayAdapter<TaskGroup> adapterTaskGroup;
+    private ArrayAdapter<Assistant> adapterAssistant;
 
     private DialogCallback dialogCallback;
     private View rootView;
+
+    private int resevationId = -1;
+    private int selecteItemPosition = -1;
+
+    private static final int SEARCH_PAGE = 0;
+    private static final int PATIENT_PAGE = 1;
+    private static final int GET_TURN_PAGE = 2;
+
 
     public DialogFragment setCallBack(DialogCallback dialogCallback) {
         this.dialogCallback = dialogCallback;
@@ -143,295 +131,258 @@ public class DialogAddTurn extends DialogFragment {
     }
 
     private void initViews() {
-        taskPrice = (TextView) rootView.findViewById(R.id.addTask_price);
-        taskSpinner = (Spinner) rootView.findViewById(R.id.addTask_subtask);
-//        taskes = new ArrayList<Task>();
+        taskPrice = (TextView) rootView.findViewById(R.id.addTurn_taskPrice);
+        spinnerTask = (Spinner) rootView.findViewById(R.id.addTurn_spinner_task);
         viewFlipper = (ViewFlipper) rootView.findViewById(R.id.addTurn_viewSwitcher);
         myCheckBox = (CheckBox) rootView.findViewById(R.id.addTurn_chbox);
-        taskGroupSpinner = (Spinner) rootView.findViewById(R.id.addTask_task);
+        spinnerTaskGroup = (Spinner) rootView.findViewById(R.id.addTurn_spinner_taskGroup);
         taskBackBtn = (Button) rootView.findViewById(R.id.addTask_backBtn);
-        addTurnBtn = (Button) rootView.findViewById(R.id.addTask_addBtn);
-        addTurnPatientName = (TextView) rootView.findViewById(R.id.addTask_patient_name);
+        btnAddTurn = (Button) rootView.findViewById(R.id.addTurn_btnAddTurn);
+        patientName = (TextView) rootView.findViewById(R.id.addTurn_patientName);
 
-        memberChboxTitle = (TextView) rootView.findViewById(R.id.addTurn_chbox_textDr);
-        memberListView = (ListView) rootView.findViewById(R.id.addTurn_listView);
-        memberUsername = (EditText) rootView.findViewById(R.id.addTurn_member_username);
-        memberName = (EditText) rootView.findViewById(R.id.addTurn_member_name);
-        memberFamily = (EditText) rootView.findViewById(R.id.addTurn_member_family);
-        memberMobile = (EditText) rootView.findViewById(R.id.addTurn_member_mobile);
-        memberSearchBtn = (Button) rootView.findViewById(R.id.addTurn_member_btnSearch);
+        chBoxTitle_Dr = (TextView) rootView.findViewById(R.id.addTurn_chbox_drTitle);
+        mListView = (ListView) rootView.findViewById(R.id.addTurn_listView);
+        user_Username = (EditText) rootView.findViewById(R.id.addTurn_search_username);
+        user_firstname = (EditText) rootView.findViewById(R.id.addTurn_search_name);
+        user_lastname = (EditText) rootView.findViewById(R.id.addTurn_search_lastname);
+        user_btnSearch = (Button) rootView.findViewById(R.id.addTurn_btnSearch);
 
-        nonMemberChboxTitle = (TextView) rootView.findViewById(R.id.addTurn_chbox_textUser);
-        nonMemberInsertBtn = (Button) rootView.findViewById(R.id.addTurn_nonMember_insertBtn);
-        nonMemberName = (EditText) rootView.findViewById(R.id.addTurn_nonMember_name);
-        nonMemberFamily = (EditText) rootView.findViewById(R.id.addTurn_nonMember_family);
-        nonMemberMobile = (EditText) rootView.findViewById(R.id.addTurn_nonMember_mobile);
+        chboxTitle_User = (TextView) rootView.findViewById(R.id.addTurn_chbox_userTitle);
+        guest_btnNext = (Button) rootView.findViewById(R.id.addTurn_guest_btnNext);
+        guest_Name = (EditText) rootView.findViewById(R.id.addTurn_guest_name);
+        guest_lastname = (EditText) rootView.findViewById(R.id.addTurn_guest_lastname);
+        guest_mobile = (EditText) rootView.findViewById(R.id.addTurn_guest_mobile);
 
-        task_adapter = new ArrayAdapter<Task>(context, R.layout.spinner_item);
-        taskGroup_adapter = new ArrayAdapter<TaskGroup>(context, R.layout.spinner_item);
-        taskSpinner.setAdapter(task_adapter);
-        taskGroupSpinner.setAdapter(taskGroup_adapter);
-        assitantSpinner = (Spinner) rootView.findViewById(R.id.addTask_assistant);
-        adapter_assistants = new ArrayAdapter<Assistant>(context, R.layout.spinner_item);
-        assitantSpinner.setAdapter(adapter_assistants);
+        adapterUser = new CustomReservationListAdapter(context, new ArrayList<User>());
+        mListView.setAdapter(adapterUser);
+        adapterTask = new ArrayAdapter<Task>(context, R.layout.spinner_item);
+        adapterTaskGroup = new ArrayAdapter<TaskGroup>(context, R.layout.spinner_item);
+        spinnerTask.setAdapter(adapterTask);
+        spinnerTaskGroup.setAdapter(adapterTaskGroup);
+        spinnerAssistant = (Spinner) rootView.findViewById(R.id.addTurn_spinner_assistant);
+        adapterAssistant = new ArrayAdapter<Assistant>(context, R.layout.spinner_item);
+        spinnerAssistant.setAdapter(adapterAssistant);
 
-        if (G.UserInfo.getRole() == UserType.User.ordinal()) {
+        if (G.officeInfo.getRole() == UserType.User.ordinal()) {
             taskBackBtn.setVisibility(View.INVISIBLE);
-            memberChboxTitle.setVisibility(View.GONE);
-            nonMemberChboxTitle.setVisibility(View.VISIBLE);
-            nonMemberName.setText(G.UserInfo.getFirstName());
-            nonMemberFamily.setText(G.UserInfo.getLastName());
-            nonMemberMobile.setText(G.UserInfo.getPhone());
-            nonMemberName.setEnabled(false);
-            nonMemberFamily.setEnabled(false);
-            nonMemberMobile.setEnabled(false);
-            viewFlipper.setDisplayedChild(1);
+            chBoxTitle_Dr.setVisibility(View.GONE);
+            chboxTitle_User.setVisibility(View.VISIBLE);
+            guest_Name.setText(G.UserInfo.getFirstName());
+            guest_lastname.setText(G.UserInfo.getLastName());
+            guest_mobile.setText(G.UserInfo.getPhone());
+            guest_Name.setEnabled(false);
+            guest_lastname.setEnabled(false);
+            guest_mobile.setEnabled(false);
+            viewFlipper.setDisplayedChild(PATIENT_PAGE);
 
         }
 
-    }
-
-    private void stopAllTaskes() {
-
-        if (asyncGetTaskes != null) {
-            asyncGetTaskes.cancel(true);
-            asyncGetTaskes = null;
-        }
-
-        if (searchUserTask != null) {
-            searchUserTask.cancel(true);
-            searchUserTask = null;
-        }
-
-        if (asyncGetTaskGroups != null) {
-            asyncGetTaskGroups.cancel(true);
-            asyncGetTaskGroups = null;
-        }
-
-        if (reserveForUserTask != null) {
-            reserveForUserTask.cancel(true);
-            reserveForUserTask = null;
-        }
-
-        if (reserveForMeTask != null) {
-            reserveForMeTask.cancel(true);
-            reserveForMeTask = null;
-        }
-
-        if (reserveForGuestTask != null) {
-            reserveForGuestTask.cancel(true);
-            reserveForGuestTask = null;
-        }
-        if (reserveForGuestFromUserTask != null) {
-            reserveForGuestFromUserTask.cancel(true);
-            reserveForGuestFromUserTask = null;
-        }
-        if (getAssistants != null) {
-            getAssistants.cancel(true);
-            getAssistants = null;
-        }
-    }
-
-    @Override
-    public void dismiss() {
-        super.dismiss();
-        stopAllTaskes();
     }
 
     private void viewListener() {
+
         myCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked) {
 
-                stopAllTaskes();
-
-                if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                    if (checked) {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(0);
-                    } else {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
-                    }
-                } else if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-                    if (checked) {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
-                        nonMemberName.setText(G.UserInfo.getFirstName());
-                        nonMemberFamily.setText(G.UserInfo.getLastName());
-                        nonMemberMobile.setText(G.UserInfo.getPhone());
-                        nonMemberName.setEnabled(false);
-                        nonMemberFamily.setEnabled(false);
-                        nonMemberMobile.setEnabled(false);
-                    } else {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
-                        nonMemberName.setEnabled(true);
-                        nonMemberFamily.setEnabled(true);
-                        nonMemberMobile.setEnabled(true);
-                        nonMemberName.setText("");
-                        nonMemberFamily.setText("");
-                        nonMemberMobile.setText("");
-                    }
+                UserType usr = UserType.values()[G.officeInfo.getRole()];
+                switch (usr) {
+                    case Dr:
+                    case secretary:
+                        if (checked) {
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(SEARCH_PAGE);
+                        } else {
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                        }
+                        break;
+                    case User:
+                        if (checked) {
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                            guest_Name.setText(G.UserInfo.getFirstName());
+                            guest_lastname.setText(G.UserInfo.getLastName());
+                            guest_mobile.setText(G.UserInfo.getPhone());
+                            guest_Name.setEnabled(false);
+                            guest_lastname.setEnabled(false);
+                            guest_mobile.setEnabled(false);
+                        } else {
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                            guest_Name.setEnabled(true);
+                            guest_lastname.setEnabled(true);
+                            guest_mobile.setEnabled(true);
+                            guest_Name.setText("");
+                            guest_lastname.setText("");
+                            guest_mobile.setText("");
+                        }
+                        break;
                 }
+
             }
         });
-        memberSearchBtn.setOnClickListener(new View.OnClickListener() {
+
+        adapterUser.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(int position, LviActionType actionType) {
+                if (actionType == LviActionType.select) {
+                    selecteItemPosition = position;
+                    patientName.setText(((User) adapterUser.getItem(position)).getFullName());
+                    viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                    if (adapterTaskGroup.isEmpty())
+                        getTaskGroups();
+                }
+
+            }
+        });
+        user_btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                searchUserTask = new asyncCallSearchUser();
-                searchUserTask.execute();
+                searchUser();
             }
         });
-
-//        taskGroupSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-////                ((TextView) parent.getChildAt(0)).setTextColor(context.getResources().getColor(R.color.textColor));
-//            }
-//            @Override
-//            public void onNothingSelected(AdapterView<?> adapterView) {
-//
-//            }
-//        });
-
 
         taskBackBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
-                stopAllTaskes();
-
+                UserType usr = UserType.values()[G.officeInfo.getRole()];
                 if (myCheckBox.isChecked()) {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(0);
-                    } else {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
+                    switch (usr) {
+                        case Dr:
+                        case secretary:
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(SEARCH_PAGE);
+                            break;
+                        default:
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                            break;
                     }
                 } else {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
-                    } else {
-                        taskBackBtn.setVisibility(View.INVISIBLE);
-                        viewFlipper.setDisplayedChild(1);
+                    switch (usr) {
+                        case Dr:
+                        case secretary:
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                            break;
+                        default:
+                            taskBackBtn.setVisibility(View.INVISIBLE);
+                            viewFlipper.setDisplayedChild(PATIENT_PAGE);
+                            break;
                     }
                 }
 
             }
         });
 
-        addTurnBtn.setOnClickListener(new View.OnClickListener() {
+        btnAddTurn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                addTurnBtn.setClickable(false);
-//                myCheckBox.setClickable(false);
-//                taskBackBtn.setClickable(false);
+
+                if (adapterAssistant.isEmpty())
+                    return;
+
+                UserType usr = UserType.values()[G.officeInfo.getRole()];
                 if (myCheckBox.isChecked()) {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                        if (reserveForUserTask == null) {
-                            reserveForUserTask = new asyncCallReserveForUserWS();
-                            reserveForUserTask.execute(users.get(selectedItem).getUserName());
-                        }
-                    } else {
-                        if (Integer.valueOf(Util.getNumber(taskPrice.getText().toString())) != 0) {
-                            if (reserveForMeTask == null) {
+                    switch (usr) {
+                        case Dr:
+                        case secretary:
+                            reserveTurnForUser(((User) adapterUser.getItem(selecteItemPosition)).getUserName());
+                            break;
+                        default:
+                            if (Integer.valueOf(Util.getNumber(taskPrice.getText().toString())) != 0) {
                                 G.reservationInfo = getPayInfo();
                                 G.reservationInfo.setOwner(UserType.User);
                                 Intent intent = new Intent(context, ActivityFactor.class);
                                 intent.putExtra("requestCode", UserType.User.ordinal());
                                 startActivityForResult(intent, UserType.User.ordinal());
+                            } else {
+                                reserveTurnForMe();
                             }
-                        } else {
-                            if (reserveForMeTask == null) {
-                                reserveForMeTask = new asyncCallReserveForMeWS();
-                                reserveForMeTask.execute();
-                            }
-                        }
-
+                            break;
                     }
+
                 } else {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                        if (reserveForGuestTask == null) {
-                            reserveForGuestTask = new asyncCallReserveForGuestWS();
-                            reserveForGuestTask.execute(nonMemberName.getText().toString().trim()
-                                    , nonMemberFamily.getText().toString().trim(), nonMemberMobile.getText().toString().trim());
-                        }
-                    } else {
-                        if (Integer.valueOf(Util.getNumber(taskPrice.getText().toString())) != 0) {
-                            if (reserveForGuestTask == null) {
+                    switch (usr) {
+                        case Dr:
+                        case secretary:
+                            reserveTurnForGuest(guest_Name.getText().toString().trim(),
+                                    guest_lastname.getText().toString().trim(),
+                                    guest_mobile.getText().toString().trim());
+                            break;
+                        default:
+                            if (Integer.valueOf(Util.getNumber(taskPrice.getText().toString())) != 0) {
                                 G.reservationInfo = getPayInfo();
                                 G.reservationInfo.setOwner(UserType.Guest);
                                 Intent intent = new Intent(context, ActivityFactor.class);
                                 intent.putExtra("requestCode", UserType.Guest.ordinal());
                                 startActivityForResult(intent, UserType.Guest.ordinal());
+                            } else {
+                                reserveTurnForGuestFromUser(guest_Name.getText().toString().trim(),
+                                        guest_lastname.getText().toString().trim(),
+                                        guest_mobile.getText().toString().trim());
                             }
-                        } else {
-                            if (reserveForGuestTask == null) {
-                                reserveForGuestFromUserTask = new asyncCallReserveForGuestFromUserWS();
-                                reserveForGuestFromUserTask.execute(nonMemberName.getText().toString().trim()
-                                        , nonMemberFamily.getText().toString().trim(), nonMemberMobile.getText().toString().trim());
-                            }
-                        }
+                            break;
                     }
                 }
             }
         });
 
 
-        nonMemberInsertBtn.setOnClickListener(new View.OnClickListener() {
+        guest_btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (checkField()) {
-                    if (G.UserInfo.getRole() == UserType.Dr.ordinal() || G.UserInfo.getRole() == UserType.secretary.ordinal()) {
-                        addTurnPatientName.setText(nonMemberName.getText().toString().trim().concat(" " + nonMemberFamily.getText().toString().trim()));
-                        if (asyncGetTaskGroups == null && taskGroup_adapter.isEmpty()) {
-                            asyncGetTaskGroups = new asyncCallGetTaskGroups();
-                            asyncGetTaskGroups.execute();
-                        } else {
-                            viewFlipper.setDisplayedChild(2);
-                            taskBackBtn.setVisibility(View.VISIBLE);
-                        }
-                    } else {
-                        if (myCheckBox.isChecked()) {
-
-                            addTurnPatientName.setText(nonMemberName.getText().toString().trim().concat(" " + nonMemberFamily.getText().toString().trim()));
-                            if (asyncGetTaskGroups == null && taskGroup_adapter.isEmpty()) {
-                                asyncGetTaskGroups = new asyncCallGetTaskGroups();
-                                asyncGetTaskGroups.execute();
+                    UserType usr = UserType.values()[G.officeInfo.getRole()];
+                    switch (usr) {
+                        case Dr:
+                        case secretary:
+                            patientName.setText(guest_Name.getText().toString().trim().concat(" " + guest_lastname.getText().toString().trim()));
+//                            viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                            if (adapterTaskGroup.isEmpty()) {
+                                getTaskGroups();
                             } else {
-                                viewFlipper.setDisplayedChild(2);
+                                viewFlipper.setDisplayedChild(GET_TURN_PAGE);
                                 taskBackBtn.setVisibility(View.VISIBLE);
                             }
+                            break;
+                        default:
+                            if (myCheckBox.isChecked()) {
 
-                        } else {
+                                patientName.setText(guest_Name.getText().toString().trim().concat(" " + guest_lastname.getText().toString().trim()));
+//                                viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                                if (adapterTaskGroup.isEmpty()) {
+                                    getTaskGroups();
+                                } else {
+                                    viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                                    taskBackBtn.setVisibility(View.VISIBLE);
+                                }
 
-                            addTurnPatientName.setText(nonMemberName.getText().toString().trim().concat(" " + nonMemberFamily.getText().toString().trim()));
-                            if (asyncGetTaskGroups == null && taskGroup_adapter.isEmpty()) {
-                                asyncGetTaskGroups = new asyncCallGetTaskGroups();
-                                asyncGetTaskGroups.execute();
                             } else {
-                                viewFlipper.setDisplayedChild(2);
-                                taskBackBtn.setVisibility(View.VISIBLE);
+
+                                patientName.setText(guest_Name.getText().toString().trim().concat(" " + guest_lastname.getText().toString().trim()));
+//                                viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                                if (adapterTaskGroup.isEmpty()) {
+                                    getTaskGroups();
+                                } else {
+                                    viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                                    taskBackBtn.setVisibility(View.VISIBLE);
+                                }
                             }
-                        }
+                            break;
                     }
+
                 }
             }
         });
 
-        taskGroupSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerTaskGroup.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
-//                if (asyncGetTaskes == null) {
-                asyncGetTaskes = new asyncCallGetTaskes();
-                asyncGetTaskes.execute();
-
-                getAssistants = new asyncCallGetAssistants();
-                getAssistants.execute();
-//                }
+                getTask();
+                getAssistantForTurn();
             }
 
             @Override
@@ -439,10 +390,10 @@ public class DialogAddTurn extends DialogFragment {
 
             }
         });
-        taskSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+        spinnerTask.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                taskPrice.setText(Util.getCurrency(((Task) taskSpinner.getSelectedItem()).getPrice()));
+                taskPrice.setText(Util.getCurrency(((Task) spinnerTask.getSelectedItem()).getPrice()));
             }
 
             @Override
@@ -455,23 +406,17 @@ public class DialogAddTurn extends DialogFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-//        addTurnBtn.setClickable(true);
-//        myCheckBox.setClickable(true);
-//        taskBackBtn.setClickable(true);
         if (resultCode == UserType.User.ordinal()) {
-            if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-
-                reserveForMeTask = new asyncCallReserveForMeWS();
-                reserveForMeTask.execute();
-
+            if (G.officeInfo.getRole() == UserType.User.ordinal()) {
+                reserveTurnForMe();
             }
         }
         if (resultCode == UserType.Guest.ordinal()) {
-            if (G.UserInfo.getRole() == UserType.User.ordinal()) {
+            if (G.officeInfo.getRole() == UserType.User.ordinal()) {
 
-                reserveForGuestFromUserTask = new asyncCallReserveForGuestFromUserWS();
-                reserveForGuestFromUserTask.execute(nonMemberName.getText().toString().trim()
-                        , nonMemberFamily.getText().toString().trim(), nonMemberMobile.getText().toString().trim());
+                reserveTurnForGuestFromUser(guest_Name.getText().toString().trim(),
+                        guest_lastname.getText().toString().trim(),
+                        guest_mobile.getText().toString().trim());
             }
         }
     }
@@ -486,327 +431,314 @@ public class DialogAddTurn extends DialogFragment {
     }
 
     private boolean checkField() {
-        if (nonMemberName.getText().toString().trim().equals("")) {
+        if (guest_Name.getText().toString().trim().equals("")) {
             new MessageBox(context, "لطفا نام مشتری را وارد نمایید .").show();
             return false;
         }
-        if (nonMemberFamily.getText().toString().trim().equals("")) {
+        if (guest_lastname.getText().toString().trim().equals("")) {
             new MessageBox(context, "لطفا نام خانوادگی مشتری را وارد نمایید .").show();
             return false;
         }
-        if (nonMemberMobile.getText().toString().trim().equals("")) {
+        if (guest_mobile.getText().toString().trim().equals("")) {
             new MessageBox(context, "لطفا شماره تلفن همراه مشتری را وارد نمایید .").show();
             return false;
         }
         return true;
     }
 
-    private class asyncCallSearchUser extends AsyncTask<String, Void, Void> {
-        User user = null;
-        String msg = null;
-        ProgressDialog dialog;
+    private void searchUser() {
+        final ProgressDialog dialog = ProgressDialog.show(context, "", Util.getStringWS(R.id.dialog_waiting));
+        dialog.getWindow().setGravity(Gravity.END);
+        MyObservable.searchUser(
+                user_Username.getText().toString().trim(),
+                user_firstname.getText().toString().trim(),
+                user_lastname.getText().toString().trim())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<User>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            memberSearchBtn.setClickable(false);
-            dialog = ProgressDialog.show(context, "", "در حال دریافت اطلاعات ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            user = new User();
-            user.setUserName(memberUsername.getText().toString().trim());
-            user.setFirstName(memberName.getText().toString().trim());
-            user.setLastName(memberFamily.getText().toString().trim());
-            user.setPhone(memberMobile.getText().toString());
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                users = WebService.invokeSearchUserWS(user.getUserName(), user.getFirstName(), user.getLastName(), user.getPhone());
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                memberSearchBtn.setClickable(true);
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                if (users != null && users.size() != 0) {
-                    ArrayList<String> userInfo = null;
-                    final ArrayList<ArrayList<String>> userha = new ArrayList<ArrayList<String>>();
-                    for (User user : users) {
-                        userInfo = new ArrayList<String>();
-                        userInfo.add(user.getFirstName() + " " + user.getLastName());
-                        userInfo.add(user.getPhone());
-                        userha.add(userInfo);
                     }
-                    memberListView.setAdapter(new CustomReservationListAdapter(context, userha, turnData.getId()));
-                    memberListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                        @Override
-                        public void onItemClick(AdapterView<?> adapterView, View container, int position, long id) {
-                            addTurnPatientName.setText(userha.get(position).get(0));
-                            selectedItem = position;
-                            if (asyncGetTaskGroups == null) {
-                                asyncGetTaskGroups = new asyncCallGetTaskGroups();
-                                asyncGetTaskGroups.execute();
-                            }
+
+                    @Override
+                    public void onNext(ArrayList<User> users) {
+                        dialog.dismiss();
+                        if (!users.isEmpty())
+                            adapterUser.addAll(users);
+                        else
+                            Toast.makeText(context, "مشتری با این مشخصات یافت نشد .", Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        dialog.dismiss();
+                        new MessageBox(context, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                    }
+                });
+    }
+
+    private void reserveTurnForUser(String patientUserName) {
+        final ProgressDialog dialog = ProgressDialog.show(context, "", Util.getStringWS(R.id.dialog_waiting));
+        dialog.getWindow().setGravity(Gravity.END);
+
+        Reservation reservation = getReservation();
+        reservation.setPatientUserName(patientUserName);
+
+        MyObservable.reserveTurnForUser(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Integer result) {
+                        dialog.dismiss();
+                        if (result > 0) {
+                            resevationId = result;
+                            Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
+                            dismiss();
+                        } else {
+                            new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
                         }
-                    });
-                    memberSearchBtn.setClickable(true);
-                    dialog.dismiss();
-                } else {
-                    memberSearchBtn.setClickable(true);
-                    dialog.dismiss();
-                    memberListView.setAdapter(new CustomReservationListAdapter(context
-                            , new ArrayList<ArrayList<String>>(), turnData.getId()));
-                    Toast.makeText(context, "مشتری با این مشخصات یافت نشده است .", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
+                    }
 
-        @Override
-        protected void onCancelled() {
-            super.onCancelled();
-            memberSearchBtn.setClickable(true);
-        }
-    }
+                    @Override
+                    public void onError(Throwable e) {
+                        dialog.dismiss();
+                        new MessageBox(context, e.getMessage()).show();
+                    }
 
-    private class asyncCallReserveForUserWS extends AsyncTask<String, Void, Void> {
-
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = getReservation();
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            reservation.setPatientUserName(strings[0]);
-            try {
-                result = WebService.invokeResevereForUser(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                if (result > 0) {
-                    resevationId = result;
-                    dialog.dismiss();
-                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                } else {
-                    dialog.dismiss();
-                    new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
-                }
-            }
-        }
-    }
-
-    private class asyncCallReserveForGuestWS extends AsyncTask<String, Void, Void> {
-
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = getReservation();
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            reservation.setPatientFirstName(strings[0]);
-            reservation.setPatientLastName(strings[1]);
-            reservation.setPatientPhoneNo(strings[2]);
-            reservation.setCityId(G.UserInfo.getCityID());
-            try {
-                result = WebService.invokeReserveForGuestWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.UserInfo.getCityID());
-                G.resNum = -1;
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                dialog.dismiss();
-                if (result > 0) {
-                    resevationId = result;
-                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                } else {
-                    new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
-                }
-            }
-        }
-    }
-
-    private class asyncCallReserveForGuestFromUserWS extends AsyncTask<String, Void, Void> {
-
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = getReservation();
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            reservation.setPatientFirstName(strings[0]);
-            reservation.setPatientLastName(strings[1]);
-            reservation.setPatientPhoneNo(strings[2]);
-            reservation.setCityId(G.UserInfo.getCityID());
-            try {
-                result = WebService.invokeReserveForGuestFromUserWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.resNum);
-                G.resNum = -1;
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                dialog.dismiss();
-                if (result > 0) {
-                    resevationId = result;
-                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                } else if (result == 0) {
-                    new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
-                } else if (result == -1) {
-                    new MessageBox(context, Util.getStringWS(R.string.addturn_etebar_error)).show();
-                }
-            }
-        }
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                    }
+                });
     }
 
 
-    private class asyncCallGetTaskGroups extends AsyncTask<String, Void, Void> {
-        String msg = null;
-        ProgressDialog dialog;
-        ArrayList<TaskGroup> taskGroups = null;
+    private void reserveTurnForGuest(String PatientFirstName, String PatientLastName, String PatientPhoneNo) {
+        final ProgressDialog dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
+        dialog.getWindow().setGravity(Gravity.END);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(context, "", "در حال دریافت اطلاعات ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            addTurnBtn.setClickable(false);
-        }
+        Reservation reservation = getReservation();
+        reservation.setPatientFirstName(PatientFirstName);
+        reservation.setPatientLastName(PatientLastName);
+        reservation.setPatientPhoneNo(PatientPhoneNo);
+        reservation.setCityId(G.UserInfo.getCityID());
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                taskGroups = WebService.invokeGetTaskGroupsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
+        MyObservable.reserveTurnForGuest(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.UserInfo.getCityID())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                if (taskGroups != null && taskGroups.size() != 0) {
+                    }
 
-                    taskBackBtn.setVisibility(View.VISIBLE);
-                    viewFlipper.setDisplayedChild(2);
-                    taskGroup_adapter.addAll(taskGroups);
+                    @Override
+                    public void onNext(Integer result) {
+                        dialog.dismiss();
+                        if (result > 0) {
+                            resevationId = result;
+                            Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
+                            dismiss();
+                        } else {
+                            new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
+                        }
+                    }
 
-                } else {
-                    new MessageBox(context, "خدماتی برای آرایشگاه ثبت نشده است .").show();
-                }
-                dialog.dismiss();
-            }
-        }
+                    @Override
+                    public void onError(Throwable e) {
+                        dialog.dismiss();
+                        new MessageBox(context, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                    }
+                });
+
     }
 
-    private class asyncCallGetTaskes extends AsyncTask<String, Void, Void> {
-        String msg = null;
-        int taskGroupId;
-        ArrayList<Task> taskes = null;
+    private void reserveTurnForGuestFromUser(String patientFirstName, String patientLastName, String patientPhoneNo) {
+        final ProgressDialog dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
+        dialog.getWindow().setGravity(Gravity.END);
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            taskGroupId = ((TaskGroup) taskGroupSpinner.getSelectedItem()).getId();
-        }
+        Reservation reservation = getReservation();
+        reservation.setPatientFirstName(patientFirstName);
+        reservation.setPatientLastName(patientLastName);
+        reservation.setPatientPhoneNo(patientPhoneNo);
+        reservation.setCityId(G.UserInfo.getCityID());
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                taskes = WebService.invokeGetTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, taskGroupId);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
+        MyObservable.reserveTurnForGuestFromUser(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.resNum)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                new MessageBox(context, msg).show();
-            } else {
-                if (taskes != null && taskes.size() != 0) {
-                    task_adapter.addAll(taskes);
-                } else {
-                    new MessageBox(context, "زیر گروه خدمات ثبت نشده است .").show();
-                }
-            }
-        }
+                    }
+
+                    @Override
+                    public void onNext(Integer result) {
+                        dialog.dismiss();
+                        switch (result) {
+                            case 0:
+                                new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
+                                break;
+                            case -1:
+                                new MessageBox(context, Util.getStringWS(R.string.addturn_etebar_error)).show();
+                                break;
+                            default:
+                                if(result > 0) {
+                                    resevationId = result;
+                                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
+                                    dismiss();
+                                }
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        dialog.dismiss();
+                        new MessageBox(context, e.getMessage()).show();
+                        G.resNum = -1;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                        G.resNum = -1;
+                    }
+                });
+
+
+    }
+
+    private void reserveTurnForMe() {
+        final ProgressDialog dialog = ProgressDialog.show(context, "", Util.getStringWS(R.id.dialog_waiting));
+        dialog.getWindow().setGravity(Gravity.END);
+
+        Reservation reservation = getReservation();
+
+        MyObservable.reserveTurnForMe(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.resNum)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<Integer>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(Integer result) {
+                        dialog.dismiss();
+                        switch (result) {
+                            case 0:
+                                new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
+                                break;
+                            case -1:
+                                new MessageBox(context, Util.getStringWS(R.string.addturn_etebar_error)).show();
+                                break;
+                            default :
+                                if(result > 0) {
+                                    resevationId = result;
+                                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
+                                    dismiss();
+                                }
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        dialog.dismiss();
+                        new MessageBox(context, e.getMessage()).show();
+                        G.resNum = -1;
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        dialog.dismiss();
+                        G.resNum = -1;
+                    }
+                });
+    }
+
+    private void getTaskGroups() {
+
+        MyObservable.getTaskGroups(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), turnData.getId())
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<TaskGroup>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ArrayList<TaskGroup> taskGroups) {
+                        if (taskGroups.isEmpty()) {
+                            new MessageBox(context, "خدماتی برای آرایشگاه ثبت نشده است .").show();
+                        } else {
+                            taskBackBtn.setVisibility(View.VISIBLE);
+                            viewFlipper.setDisplayedChild(GET_TURN_PAGE);
+                            adapterTaskGroup.addAll(taskGroups);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(context, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
+    }
+
+
+    private void getTask() {
+        int taskGroupId = ((TaskGroup) spinnerTaskGroup.getSelectedItem()).getId();
+        adapterTask.clear();
+        MyObservable.getTasks(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), taskGroupId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<Task>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ArrayList<Task> tasks) {
+                        if (tasks.isEmpty())
+                            new MessageBox(context, "زیر گروه خدمات ثبت نشده است .").show();
+                        else
+                            adapterTask.addAll(tasks);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(context, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
     }
 
     private Reservation getReservation() {
@@ -814,94 +746,43 @@ public class DialogAddTurn extends DialogFragment {
         Reservation reserve = new Reservation();
         reserve.setTurnId(turnData.getId());
         reserve.setFirstReservationId(0);
-        reserve.setTaskId(((Task) taskSpinner.getSelectedItem()).getId());
+        reserve.setTaskId(((Task) spinnerTask.getSelectedItem()).getId());
         reserve.setNumberOfTurns(1);
-        reserve.setAssistantUsername(((Assistant) assitantSpinner.getSelectedItem()).getUsername());
+        reserve.setAssistantUsername(((Assistant) spinnerAssistant.getSelectedItem()).getUsername());
         return reserve;
     }
 
-    private class asyncCallReserveForMeWS extends AsyncTask<String, Void, Void> {
 
-        int result = 0;
-        Reservation reservation = null;
-        String msg = null;
-        ProgressDialog dialog;
+    private void getAssistantForTurn() {
+        int taskGroupId = ((TaskGroup) spinnerTaskGroup.getSelectedItem()).getId();
+        adapterAssistant.clear();
+        MyObservable.getAssistantForTurn(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), turnData.getId(), taskGroupId)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ArrayList<Assistant>>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
 
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog = ProgressDialog.show(context, "", "لطفا شکیبا باشید ...");
-            dialog.setCancelable(true);
-            dialog.getWindow().setGravity(Gravity.END);
-            reservation = getReservation();
-        }
+                    }
 
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                result = WebService.invokeReserveForMeWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), reservation, G.resNum);
-                G.resNum = -1;
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
+                    @Override
+                    public void onNext(ArrayList<Assistant> assistants) {
+                        if (assistants.isEmpty()) {
+                            new MessageBox(context, "هیچ آرایشگری جهت ارئه خدمات وجود ندارد .").show();
+                        } else {
+                            adapterAssistant.addAll(assistants);
+                        }
+                    }
 
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                dialog.dismiss();
-                new MessageBox(context, msg).show();
-            } else {
-                dialog.dismiss();
-                if (result > 0) {
-                    resevationId = result;
-                    Toast.makeText(context, "ثبت نوبت با موفقیت انجام شد .", Toast.LENGTH_SHORT).show();
-                    dismiss();
-                } else if (result == 0) {
-                    new MessageBox(context, "ثبت نوبت با مشکل مواجه شد !").show();
-                } else if (result == -1) {
-                    new MessageBox(context, Util.getStringWS(R.string.addturn_etebar_error)).show();
-                }
-            }
-        }
+                    @Override
+                    public void onError(Throwable e) {
+                        new MessageBox(context, e.getMessage()).show();
+                    }
+
+                    @Override
+                    public void onComplete() {
+                    }
+                });
     }
 
-    private class asyncCallGetAssistants extends AsyncTask<String, Void, Void> {
-        String msg = null;
-        int taskGroupId;
-        ArrayList<Assistant> assistants = null;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            taskGroupId = ((TaskGroup) taskGroupSpinner.getSelectedItem()).getId();
-        }
-
-        @Override
-        protected Void doInBackground(String... strings) {
-            try {
-                assistants = WebService.getAssistantOfficeTaskWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, turnData.getId(), taskGroupId);
-            } catch (PException ex) {
-                msg = ex.getMessage();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            super.onPostExecute(aVoid);
-            if (msg != null) {
-                new MessageBox(context, msg).show();
-            } else {
-                if (assistants != null && assistants.size() != 0) {
-                    adapter_assistants.addAll(assistants);
-                    addTurnBtn.setClickable(true);
-                } else {
-                    new MessageBox(context, "هیچ آرایشگری جهت ارئه خدمات وجود ندارد .").show();
-                }
-            }
-        }
-    }
 }

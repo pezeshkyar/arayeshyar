@@ -2,7 +2,6 @@ package com.example.doctorsbuilding.nav;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -10,7 +9,6 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ExpandableListView;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -18,6 +16,7 @@ import android.widget.TextView;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpChild;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpGroup;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ public class ActivityAddNextTurn extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityAddNextTurn.this);
+        Util.setStatusBarColor(ActivityAddNextTurn.this);
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_add_next_turn);
         patientInfo = (PatientInfo)getIntent().getSerializableExtra("patientInfo");
@@ -135,8 +134,8 @@ public class ActivityAddNextTurn extends AppCompatActivity {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                result = WebService.invokeGetAllTurnFromToday(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                result = WebService.invokeGetAllTurnFromToday(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

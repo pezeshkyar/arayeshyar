@@ -11,7 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -19,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -61,7 +61,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(MapActivity.this);
+        Util.setStatusBarColor(MapActivity.this);
         setContentView(R.layout.activity_map);
         displayMeOnMap();
         btnStartLocationUpdates = (Button) findViewById(R.id.btnLocationUpdates);
@@ -260,7 +260,7 @@ public class MapActivity extends AppCompatActivity implements GoogleApiClient.Co
             try {
                 result = WebService.invokeUpdateOfficeLatLngWS(G.UserInfo.getUserName(), G.UserInfo.getPassword()
                         , G.officeInfo.getId(), G.officeInfo.getLatitude(), G.officeInfo.getLongitude());
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

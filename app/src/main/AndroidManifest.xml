@@ -222,7 +222,7 @@
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="stateHidden" />
         <activity
-            android:name=".MainForm.ActivityLoading"
+            android:name=".ActivityLoading"
             android:screenOrientation="portrait"
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="stateHidden" />
@@ -233,6 +233,16 @@
             android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".ActivityPatientAssistant"
+            android:screenOrientation="portrait"
+            android:theme="@style/MyTheme"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ActivityAddNewOffice"
+            android:screenOrientation="portrait"
+            android:theme="@style/MyTheme"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".ActivityMyOffices"
             android:screenOrientation="portrait"
             android:theme="@style/MyTheme"
             android:windowSoftInputMode="stateHidden" />

@@ -28,6 +28,7 @@ import com.example.doctorsbuilding.nav.Dr.Notification.NotificationFragment;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpandListAdapter;
 import com.example.doctorsbuilding.nav.Dr.Profile.PersonalInfoFragment;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class ActivityPatientFile extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        G.setStatusBarColor(ActivityPatientFile.this);
+        Util.setStatusBarColor(ActivityPatientFile.this);
         setContentView(R.layout.activity_patient_file);
 
         patientUsername = getIntent().getExtras().getString("patientUserName");
@@ -90,7 +91,7 @@ public class ActivityPatientFile extends AppCompatActivity {
             for (int i = 0; i < tabChildsCount; i++) {
                 View tabViewChild = vgTab.getChildAt(i);
                 if (tabViewChild instanceof TextView) {
-                    ((TextView) tabViewChild).setTypeface(G.getNormalFont());
+                    ((TextView) tabViewChild).setTypeface(Util.getNormalFont());
                 }
             }
         }

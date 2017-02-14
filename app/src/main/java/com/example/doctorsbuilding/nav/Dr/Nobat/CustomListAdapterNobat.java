@@ -16,7 +16,7 @@ import android.widget.Toast;
 import com.example.doctorsbuilding.nav.CancelReservationDialog;
 import com.example.doctorsbuilding.nav.Dr.Profile.ExpChild;
 import com.example.doctorsbuilding.nav.G;
-import com.example.doctorsbuilding.nav.PException;
+import com.example.doctorsbuilding.nav.MyException;
 import com.example.doctorsbuilding.nav.R;
 import com.example.doctorsbuilding.nav.Turn;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
@@ -153,8 +153,8 @@ public class CustomListAdapterNobat extends BaseAdapter {
             int turnId = Integer.valueOf(strings[0]);
             position = Integer.valueOf(strings[1]);
             try {
-                result = WebService.invokeRemoveTurnWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, turnId);
-            } catch (PException ex) {
+                result = WebService.invokeRemoveTurnWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), turnId);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;

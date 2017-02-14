@@ -22,6 +22,7 @@ import com.example.doctorsbuilding.nav.Question.Question;
 import com.example.doctorsbuilding.nav.Question.Reply;
 import com.example.doctorsbuilding.nav.Question.ReplyType;
 import com.example.doctorsbuilding.nav.Util.MessageBox;
+import com.example.doctorsbuilding.nav.Util.Util;
 import com.example.doctorsbuilding.nav.Web.WebService;
 
 import java.util.ArrayList;
@@ -95,8 +96,8 @@ public class FragmentPatientMedicalHistory extends Fragment {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                replies = WebService.invokeGetReplyWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId, patientUserName);
-            } catch (PException ex) {
+                replies = WebService.invokeGetReplyWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(), patientUserName);
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -159,8 +160,8 @@ public class FragmentPatientMedicalHistory extends Fragment {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId);
-            } catch (PException ex) {
+                questions = WebService.invokeGetQuestionsWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId());
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
@@ -196,7 +197,7 @@ public class FragmentPatientMedicalHistory extends Fragment {
                 CheckBox chbox = new CheckBox(getActivity());
                 chbox.setId(q.getId());
                 chbox.setText(q.getLabel());
-                chbox.setTypeface(G.getNormalFont());
+                chbox.setTypeface(Util.getNormalFont());
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 10, 0, 0);
                 chbox.setLayoutParams(params);
@@ -206,7 +207,7 @@ public class FragmentPatientMedicalHistory extends Fragment {
             } else {
                 TextView mTV = new TextView(getActivity());
                 mTV.setText(q.getLabel());
-                mTV.setTypeface(G.getNormalFont());
+                mTV.setTypeface(Util.getNormalFont());
                 mTV.setTextColor(Color.BLACK);
                 LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params.setMargins(0, 10, 0, 0);
@@ -216,7 +217,7 @@ public class FragmentPatientMedicalHistory extends Fragment {
                 EditText mTxt = new EditText(getActivity());
                 mTxt.setId(q.getId());
                 mTxt.setHint(q.getLabel());
-                mTxt.setTypeface(G.getNormalFont());
+                mTxt.setTypeface(Util.getNormalFont());
                 LinearLayout.LayoutParams params1 = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                 params1.setMargins(0, 10, 0, 0);
                 mTxt.setLayoutParams(params1);
@@ -227,7 +228,7 @@ public class FragmentPatientMedicalHistory extends Fragment {
         }
 
         insertBtn.setText("ثبت اطلاعات");
-        insertBtn.setTypeface(G.getNormalFont());
+        insertBtn.setTypeface(Util.getNormalFont());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         params.setMargins(0, 20, 0, 20);
         insertBtn.setBackgroundResource(R.drawable.my_button);
@@ -280,14 +281,14 @@ public class FragmentPatientMedicalHistory extends Fragment {
         @Override
         protected Void doInBackground(String... strings) {
             try {
-                if (G.UserInfo.getRole() == UserType.User.ordinal()) {
-                    result = WebService.invokeSetReplyBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId,
+                if (G.officeInfo.getRole() == UserType.User.ordinal()) {
+                    result = WebService.invokeSetReplyBatchWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(),
                             questionIds, answers);
                 } else {
-                    result = WebService.invokeSetReplyBatchForUserWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeId,
+                    result = WebService.invokeSetReplyBatchForUserWS(G.UserInfo.getUserName(), G.UserInfo.getPassword(), G.officeInfo.getId(),
                             patientUserName, questionIds, answers);
                 }
-            } catch (PException ex) {
+            } catch (MyException ex) {
                 msg = ex.getMessage();
             }
             return null;
